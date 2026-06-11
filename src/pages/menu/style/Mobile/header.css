@@ -5,7 +5,7 @@
 	gap: 1.5rem;
 	align-items: center;
 	justify-content: center;
-	background-color: var(--carbon-black);
+	background-color: var(--header-color);
 	box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 	padding: 1rem 0;
 }
@@ -22,12 +22,12 @@
 	padding: 0.5rem 1rem;
 	border-radius: 20px;
 	border: none;
-	background-color: var(--flora-white);
+	background-color: var(--header-options);
 	font-family: inherit;
 	font-size: 16px;
 }
 .menu-header-top input::placeholder {
-	color: var(--black-olive);
+	color: var(--background-color);
 }
 .menu-options {
 	width: 40%;
@@ -41,14 +41,14 @@
 	padding: 0.5rem 1rem;
 	border-radius: 1rem;
 	border: none;
-	background-color: var(--flora-white);
-	color: var(--black-olive);
+	background-color: var(--header-options);
+	color: var(--background-color);
 	font-family: inherit;
 	cursor: pointer;
 	transition: background-color 0.3s ease;
 }
 .menu-options button:hover {
-	background-color: var(--black-olive);
+	background-color: var(--header-options-hover);
 	color: var(--flora-white);
 }
 .menu-nav {
@@ -75,11 +75,15 @@
 	list-style: none;
 	padding: 0.5rem 1.5rem;
 	border-radius: 1rem;
-	background-color: var(--flora-white);
-	color: var(--black-olive);
+	background-color: var(--header-options);
+	color: var(--background-color);
 	font-size: 1rem;
 	cursor: pointer;
 	transition: background-color 0.3s ease;
+}
+.menu-cafe-categories li:hover, .menu-restaurant-categories li:hover {
+	background-color: var(--header-options-hover);
+	color: var(--flora-white);
 }
 .menu-cafe-categories li a, .menu-restaurant-categories li a {
 	text-decoration: none;

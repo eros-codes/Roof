@@ -126,7 +126,13 @@
 }
 
 :root{
-	--black-olive: #32372C;
+	--background-color: #32372C;
+
+	--header-color: #121314;
+	--header-options: #faf7fa;
+	--header-options-hover: #32372C;
+
+	--black-olive: #3B3C36;
 	--carbon-black: #121314;
 	--flora-white: #faf7ef;
 }
@@ -135,5 +141,5 @@ html, body{
     font-family: 'Lora', 'Baloo Bhaijaan 2', serif;
 	min-height: 100dvh;
 	width: 100%;
-	background-color: var(--black-olive);
+	background-color: var(--background-color);
 }
