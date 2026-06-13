@@ -1,5 +1,5 @@
 header.about-header{
-    width: 100%;
+    width: 95%;
     height: 50px;
     display: flex;
     flex-direction: row;
@@ -27,8 +27,25 @@ main.about-main{
     justify-content: start;
     align-items: center;
 }
-main.about-main img{
+main.about-main div.img{
     width: 95%;
-    height: 200px;
-    object-fit: cover;
+    height: 225px;
+    background-image: url(../../../../../public/assets/images/2026-06-14\ 01.04.48.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center -280px;
+    margin-bottom: 15px;
+}
+main.about-main div.matn{
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: start;
+    align-items: center;
+    color: white;
+    line-height: 25px;
+}
+main.about-main div.matn p{
+    padding: 0px 10px;
+    text-align: center;
+    font-size: 11px;
 }
