@@ -43,9 +43,30 @@ main.about-main div.matn{
     align-items: center;
     color: white;
     line-height: 25px;
+    margin-bottom: 10px;
 }
 main.about-main div.matn p{
     padding: 0px 10px;
     text-align: center;
     font-size: 11px;
+}
+main.about-main div.cards{
+    width: 80%;
+    height: 160px;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: start;
+    align-items: start;
+    margin-bottom: 20px;
+    gap: 20px   ;
+}
+main.about-main div.cards div.card{
+    width: 30%;
+    height: 100%;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: start;
+    align-items: center;
+    background-color: white;
+    border-radius: 5px;
 }
