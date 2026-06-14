@@ -1,153 +1,164 @@
-*{
-    margin: 0;
-    padding: 0;
-    text-decoration: none;
-    box-sizing: border-box;
-    border: none;
+* {
+	margin: 0;
+	padding: 0;
+	text-decoration: none;
+	box-sizing: border-box;
+	border: none;
 	outline: none;
 	font-size: 14px;
-    direction: rtl;
-    list-style: none;
+	direction: rtl;
+	list-style: none;
 }
 
 @font-face {
-    font-family: 'Lora';
-    src: url("../../fonts/Lora/Lora-VariableFont_wght.ttf") format("truetype");
-    font-weight: 100 900;
-    font-style: normal;
-    font-display: swap;
+	font-family: "Lora";
+	src: url("../../fonts/Lora/Lora-VariableFont_wght.ttf") format("truetype");
+	font-weight: 100 900;
+	font-style: normal;
+	font-display: swap;
 }
 @font-face {
-    font-family: 'Lora';
-    src: url("../../fonts/Lora/Lora-Italic-VariableFont_wght.ttf") format("truetype");
-    font-weight: 100 900;
-    font-style: italic;
-    font-display: swap;
+	font-family: "Lora";
+	src: url("../../fonts/Lora/Lora-Italic-VariableFont_wght.ttf")
+		format("truetype");
+	font-weight: 100 900;
+	font-style: italic;
+	font-display: swap;
 }
 @font-face {
-    font-family: 'Baloo Bhaijaan 2';
-    src: url("../../fonts/Baloo_Bhaijaan_2/BalooBhaijaan2-VariableFont_wght.ttf") format("truetype");
-    font-weight: 100 900;
-    font-style: normal;
-    font-display: swap;
+	font-family: "Baloo Bhaijaan 2";
+	src: url("../../fonts/Baloo_Bhaijaan_2/BalooBhaijaan2-VariableFont_wght.ttf")
+		format("truetype");
+	font-weight: 100 900;
+	font-style: normal;
+	font-display: swap;
 }
 
 /* Static font fallbacks (for browsers without variable font support) */
 @font-face {
-    font-family: 'Lora';
-    src: url("../../fonts/Lora/static/Lora-Regular.ttf") format("truetype");
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
+	font-family: "Lora";
+	src: url("../../fonts/Lora/static/Lora-Regular.ttf") format("truetype");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
 }
 @font-face {
-    font-family: 'Lora';
-    src: url("../../fonts/Lora/static/Lora-Italic.ttf") format("truetype");
-    font-weight: 400;
-    font-style: italic;
-    font-display: swap;
+	font-family: "Lora";
+	src: url("../../fonts/Lora/static/Lora-Italic.ttf") format("truetype");
+	font-weight: 400;
+	font-style: italic;
+	font-display: swap;
 }
 @font-face {
-    font-family: 'Lora';
-    src: url("../../fonts/Lora/static/Lora-Medium.ttf") format("truetype");
-    font-weight: 500;
-    font-style: normal;
-    font-display: swap;
+	font-family: "Lora";
+	src: url("../../fonts/Lora/static/Lora-Medium.ttf") format("truetype");
+	font-weight: 500;
+	font-style: normal;
+	font-display: swap;
 }
 @font-face {
-    font-family: 'Lora';
-    src: url("../../fonts/Lora/static/Lora-MediumItalic.ttf") format("truetype");
-    font-weight: 500;
-    font-style: italic;
-    font-display: swap;
+	font-family: "Lora";
+	src: url("../../fonts/Lora/static/Lora-MediumItalic.ttf") format("truetype");
+	font-weight: 500;
+	font-style: italic;
+	font-display: swap;
 }
 @font-face {
-    font-family: 'Lora';
-    src: url("../../fonts/Lora/static/Lora-SemiBold.ttf") format("truetype");
-    font-weight: 600;
-    font-style: normal;
-    font-display: swap;
+	font-family: "Lora";
+	src: url("../../fonts/Lora/static/Lora-SemiBold.ttf") format("truetype");
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
 }
 @font-face {
-    font-family: 'Lora';
-    src: url("../../fonts/Lora/static/Lora-SemiBoldItalic.ttf") format("truetype");
-    font-weight: 600;
-    font-style: italic;
-    font-display: swap;
+	font-family: "Lora";
+	src: url("../../fonts/Lora/static/Lora-SemiBoldItalic.ttf")
+		format("truetype");
+	font-weight: 600;
+	font-style: italic;
+	font-display: swap;
 }
 @font-face {
-    font-family: 'Lora';
-    src: url("../../fonts/Lora/static/Lora-Bold.ttf") format("truetype");
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
+	font-family: "Lora";
+	src: url("../../fonts/Lora/static/Lora-Bold.ttf") format("truetype");
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
 }
 @font-face {
-    font-family: 'Lora';
-    src: url("../../fonts/Lora/static/Lora-BoldItalic.ttf") format("truetype");
-    font-weight: 700;
-    font-style: italic;
-    font-display: swap;
+	font-family: "Lora";
+	src: url("../../fonts/Lora/static/Lora-BoldItalic.ttf") format("truetype");
+	font-weight: 700;
+	font-style: italic;
+	font-display: swap;
 }
 
 @font-face {
-    font-family: 'Baloo Bhaijaan 2';
-    src: url("../../fonts/Baloo_Bhaijaan_2/static/BalooBhaijaan2-Regular.ttf") format("truetype");
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
+	font-family: "Baloo Bhaijaan 2";
+	src: url("../../fonts/Baloo_Bhaijaan_2/static/BalooBhaijaan2-Regular.ttf")
+		format("truetype");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
 }
 @font-face {
-    font-family: 'Baloo Bhaijaan 2';
-    src: url("../../fonts/Baloo_Bhaijaan_2/static/BalooBhaijaan2-Medium.ttf") format("truetype");
-    font-weight: 500;
-    font-style: normal;
-    font-display: swap;
+	font-family: "Baloo Bhaijaan 2";
+	src: url("../../fonts/Baloo_Bhaijaan_2/static/BalooBhaijaan2-Medium.ttf")
+		format("truetype");
+	font-weight: 500;
+	font-style: normal;
+	font-display: swap;
 }
 @font-face {
-    font-family: 'Baloo Bhaijaan 2';
-    src: url("../../fonts/Baloo_Bhaijaan_2/static/BalooBhaijaan2-SemiBold.ttf") format("truetype");
-    font-weight: 600;
-    font-style: normal;
-    font-display: swap;
+	font-family: "Baloo Bhaijaan 2";
+	src: url("../../fonts/Baloo_Bhaijaan_2/static/BalooBhaijaan2-SemiBold.ttf")
+		format("truetype");
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
 }
 @font-face {
-    font-family: 'Baloo Bhaijaan 2';
-    src: url("../../fonts/Baloo_Bhaijaan_2/static/BalooBhaijaan2-Bold.ttf") format("truetype");
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
+	font-family: "Baloo Bhaijaan 2";
+	src: url("../../fonts/Baloo_Bhaijaan_2/static/BalooBhaijaan2-Bold.ttf")
+		format("truetype");
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
 }
 @font-face {
-    font-family: 'Baloo Bhaijaan 2';
-    src: url("../../fonts/Baloo_Bhaijaan_2/static/BalooBhaijaan2-ExtraBold.ttf") format("truetype");
-    font-weight: 800;
-    font-style: normal;
-    font-display: swap;
+	font-family: "Baloo Bhaijaan 2";
+	src: url("../../fonts/Baloo_Bhaijaan_2/static/BalooBhaijaan2-ExtraBold.ttf")
+		format("truetype");
+	font-weight: 800;
+	font-style: normal;
+	font-display: swap;
 }
 
-:root{
+:root {
 	--background-color: #b3b7ba;
 
-    --primary-color: #090f15;
-    --secondary-color: #d3d1ce;
-    --tertiary-color: #6c6d74;
+	--primary-text-color: #090f15;
+	--secondary-text-color: #d3d1ce;
+	--tertiary-text-color: #6c6d74;
 
 	--header-color: #262e36;
 	--header-options: #faf7fa;
 	--header-options-hover: #6c6d74;
-    --nav-category: #262e36;
-    --nav-category-hover: #090f15;
+	--nav-category: #262e36;
+	--nav-category-hover: #090f15;
 
-  --arctic: #d3d1ce;
-  --apres: #6c6d74;
-  --slopes: #b3b7ba;
-  --midnight: #090f15;
-  --mountain: #262e36;
+	--card-color: #d3d1ce;
+
+	--arctic: #d3d1ce;
+	--apres: #6c6d74;
+	--slopes: #b3b7ba;
+	--midnight: #090f15;
+	--mountain: #262e36;
 }
 
-html, body{
-    font-family: 'Lora', 'Baloo Bhaijaan 2', serif;
+html,
+body {
+	font-family: "Lora", "Baloo Bhaijaan 2", serif;
 	min-height: 100dvh;
 	width: 100%;
 	background-color: var(--background-color);

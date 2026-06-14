@@ -5,6 +5,9 @@
 	gap: 0.5rem;
 	align-items: center;
 	justify-content: center;
+	position: sticky;
+	top: 0;
+	z-index: 100;
 }
 .menu-header-top {
 	padding: 1rem 1rem;
@@ -49,14 +52,14 @@
 	border-radius: 1rem;
 	border: none;
 	background-color: var(--header-options);
-	color: var(--primary-color);
+	color: var(--primary-text-color);
 	font-family: inherit;
 	cursor: pointer;
 	transition: background-color 0.3s ease;
 }
 .menu-options button:hover {
 	background-color: var(--header-options-hover);
-	color: var(--secondary-color);
+	color: var(--secondary-text-color);
 }
 .menu-nav {
 	width: 100%;
@@ -78,14 +81,14 @@
 	padding: 0.5rem 1.5rem;
 	border-radius: 1rem;
 	background-color: var(--header-color);
-	color: var(--secondary-color);
+	color: var(--secondary-text-color);
 	font-size: 1rem;
 	cursor: pointer;
 	transition: background-color 0.3s ease;
 }
 .menu-categories li:hover {
 	background-color: var(--header-options-hover);
-	color: var(--secondary-color);
+	color: var(--secondary-text-color);
 }
 .menu-categories li a {
 	text-decoration: none;
@@ -94,9 +97,9 @@
 }
 .menu-options button.selected {
 	background-color: var(--header-options-hover);
-	color: var(--secondary-color);
+	color: var(--secondary-text-color);
 }
 .menu-categories li.selected{
 	background-color: var(--header-options-hover);
-	color: var(--secondary-color);
+	color: var(--secondary-text-color);
 }

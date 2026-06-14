@@ -1,4 +1,4 @@
-import { categories, products } from "./js/state.js";
+import { products } from "./js/state.js";
 import { toggleCategories, renderCategories } from "./js/header.js";
 
 document.addEventListener("DOMContentLoaded", () => {
