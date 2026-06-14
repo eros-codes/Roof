@@ -21,6 +21,7 @@ export function renderCategories(type) {
 	const fragment = document.createDocumentFragment();
 
 	const allLi = document.createElement("li");
+	allLi.dataset.categoryId = "all";
 	const allA = document.createElement("a");
 	allA.href = "#";
 	allA.textContent = "همه";
@@ -28,14 +29,17 @@ export function renderCategories(type) {
 	allLi.classList.add("selected");
 	fragment.appendChild(allLi);
 
-	categories[type].forEach((cat) => {
-		const li = document.createElement("li");
-		const a = document.createElement("a");
-		a.href = "#";
-		a.textContent = cat.name;
-		li.appendChild(a);
-		fragment.appendChild(li);
-	});
+	categories
+		.filter((cat) => cat.type === type)
+		.forEach((cat) => {
+			const li = document.createElement("li");
+			li.dataset.categoryId = cat.id;
+			const a = document.createElement("a");
+			a.href = "#";
+			a.textContent = cat.name;
+			li.appendChild(a);
+			fragment.appendChild(li);
+		});
 
 	categoriesContainer.appendChild(fragment);
 }
