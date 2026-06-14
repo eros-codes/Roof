@@ -1,5 +1,26 @@
 import { categories } from "./state.js";
 
+function safeGetItem(key, fallback = null) {
+	try {
+		const v = localStorage.getItem(key);
+		return v === null ? fallback : v;
+	} catch (e) {
+		return fallback;
+	}
+}
+
+function safeSetItem(key, value) {
+	try {
+		localStorage.setItem(key, String(value));
+	} catch (e) {}
+}
+
+function safeRemoveItem(key) {
+	try {
+		localStorage.removeItem(key);
+	} catch (e) {}
+}
+
 export function toggleCategories(active = "cafe") {
 	const cafeCats = document.getElementById("cafe-cats");
 	const restCats = document.getElementById("rest-cats");
@@ -17,7 +38,7 @@ export function renderCategories(type) {
 	const categoriesContainer = document.querySelector(".menu-categories");
 	if (!categoriesContainer) return;
 
-	let currentCategory = localStorage.getItem("currentCategory");
+	let currentCategoryRaw = safeGetItem("currentCategory", null);
 
 	categoriesContainer.innerHTML = "";
 	const fragment = document.createDocumentFragment();
@@ -29,18 +50,18 @@ export function renderCategories(type) {
 	}
 
 	// ensure currentCategory belongs to this menu type; otherwise default to first category
-	const currentCategoryNum = Number(currentCategory);
-	const belongsToType = filtered.some((cat) => cat.id === currentCategoryNum);
-	if (!currentCategory || !belongsToType) {
+	const currentCategoryNum = currentCategoryRaw !== null ? Number(currentCategoryRaw) : NaN;
+	const belongsToType = Number.isFinite(currentCategoryNum) && filtered.some((cat) => cat.id === currentCategoryNum);
+	if (!Number.isFinite(currentCategoryNum) || !belongsToType) {
 		const first = filtered[0];
-		localStorage.setItem("currentCategory", String(first.id));
-		currentCategory = String(first.id);
+		safeSetItem("currentCategory", String(first.id));
+		currentCategoryRaw = String(first.id);
 	}
 
 	filtered.forEach((cat) => {
 		const li = document.createElement("li");
 		li.dataset.categoryId = cat.id;
-		if (Number(currentCategory) === cat.id) {
+		if (Number(currentCategoryRaw) === cat.id) {
 			li.classList.add("selected");
 		}
 		const a = document.createElement("a");
@@ -53,9 +74,27 @@ export function renderCategories(type) {
 	categoriesContainer.appendChild(fragment);
 }
 
-export function switchMode(menuType) {
+export function changeMenu(menuType) {
 	// set current menu and update header UI/categories list
-	localStorage.setItem("currentMenu", menuType);
+	safeSetItem("currentMenu", menuType);
+
+	// decide which category should be selected for this menu
+	const filtered = categories.filter((c) => c.type === menuType);
+	const currentCategoryRaw = safeGetItem("currentCategory", null);
+	const currentCategoryNum = currentCategoryRaw !== null ? Number(currentCategoryRaw) : NaN;
+	const belongsToType = Number.isFinite(currentCategoryNum) && filtered.some((cat) => cat.id === currentCategoryNum);
+	let selectedCategoryId = null;
+	if (Number.isFinite(currentCategoryNum) && belongsToType) {
+		selectedCategoryId = currentCategoryNum;
+	} else if (filtered.length > 0) {
+		selectedCategoryId = filtered[0].id;
+		safeSetItem("currentCategory", String(selectedCategoryId));
+	} else {
+		safeRemoveItem("currentCategory");
+	}
+
 	toggleCategories(menuType);
 	renderCategories(menuType);
+
+	return selectedCategoryId;
 }

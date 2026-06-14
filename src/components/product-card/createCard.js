@@ -1,3 +1,8 @@
+const IMAGE_BASE = new URL(
+	"../../../public/assets/images/products/",
+	import.meta.url,
+);
+
 export function createCard({ id, name, description, price, image }) {
 	const card = document.createElement("section");
 	card.classList.add("food-card");
@@ -6,7 +11,7 @@ export function createCard({ id, name, description, price, image }) {
 	const picDiv = document.createElement("div");
 	picDiv.classList.add("food-pic");
 	const img = document.createElement("img");
-	img.src = "../../../public/assets/images/products/" + image;
+	img.src = new URL(image, IMAGE_BASE).href;
 	img.alt = name;
 	picDiv.appendChild(img);
 
@@ -20,7 +25,7 @@ export function createCard({ id, name, description, price, image }) {
 	nameH3.textContent = name;
 	const priceDiv = document.createElement("div");
 	priceDiv.classList.add("food-price");
-	priceDiv.textContent = `${price.toLocaleString()} تومان`;
+	priceDiv.textContent = `${price.toLocaleString("fa-IR")} تومان`;
 
 	tagDiv.appendChild(nameH3);
 	tagDiv.appendChild(priceDiv);

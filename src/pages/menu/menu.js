@@ -1,5 +1,5 @@
 import { products, categories } from "./js/state.js";
-import { toggleCategories, renderCategories, switchMode } from "./js/header.js";
+import { changeMenu } from "./js/header.js";
 import { createCard } from "../../components/product-card/createCard.js";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -8,18 +8,44 @@ document.addEventListener("DOMContentLoaded", () => {
 	const restCats = document.getElementById("rest-cats");
 	const menuMain = document.querySelector(".menu-main");
 
-	const currentMenu = getCurrentMenu();
+	const safeLocal = {
+		get(key, fallback = null) {
+			try {
+				const v = localStorage.getItem(key);
+				return v === null ? fallback : v;
+			} catch (e) {
+				return fallback;
+			}
+		},
+		set(key, value) {
+			try {
+				localStorage.setItem(key, String(value));
+			} catch (e) {}
+		},
+		remove(key) {
+			try {
+				localStorage.removeItem(key);
+			} catch (e) {}
+		},
+	};
 
-	// get current menu and category from localStorage, or default to 'cafe' and its first category
+	// helpers
 	function getCurrentMenu() {
-		return localStorage.getItem("currentMenu") || "cafe";
+		return safeLocal.get("currentMenu", "cafe");
 	}
-	// removed getCurrentCategory helper; read directly from localStorage when needed
-
+	function getProductsByCategory(categoryId) {
+		return products.filter((product) => product.categoryId === categoryId);
+	}
+	
 	function renderProducts(productsList) {
 		if (!menuMain) return;
 
 		menuMain.innerHTML = "";
+
+		if (productsList.length === 0) {
+			menuMain.textContent = "به زودی محصولات این دسته اضافه خواهند شد!";
+			return;
+		}
 
 		const fragment = document.createDocumentFragment();
 
@@ -31,48 +57,34 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 
 	// On first visit: if no menu set, default to 'cafe' and set its first category
-	if (!localStorage.getItem("currentMenu")) {
-		localStorage.setItem("currentMenu", "cafe");
+	if (!safeLocal.get("currentMenu", null)) {
+		safeLocal.set("currentMenu", "cafe");
 		const firstCafeCat = categories.find((c) => c.type === "cafe");
 		if (firstCafeCat) {
-			localStorage.setItem("currentCategory", String(firstCafeCat.id));
+			safeLocal.set("currentCategory", String(firstCafeCat.id));
 		}
 	}
 
 	// Render categories for the current menu type
 	if (cafeCats) {
 		cafeCats.addEventListener("click", () => {
-			const firstCafeCat = categories.find((c) => c.type === "cafe");
-			if (firstCafeCat) {
-				localStorage.setItem("currentCategory", String(firstCafeCat.id));
-			} else {
-				localStorage.removeItem("currentCategory");
-			}
-			switchMode("cafe");
-			const catId = localStorage.getItem("currentCategory");
-			if (catId) {
-				const filtered = products.filter((p) => p.categoryId === Number(catId));
-				renderProducts(filtered);
-			} else {
-				menuMain.innerHTML = "";
+			if (getCurrentMenu() === "cafe") return;
+
+			const selectedId = changeMenu("cafe");
+
+			if (selectedId != null) {
+				renderProducts(getProductsByCategory(selectedId));
 			}
 		});
 	}
 	if (restCats) {
 		restCats.addEventListener("click", () => {
-			const firstRestCat = categories.find((c) => c.type === "restaurant");
-			if (firstRestCat) {
-				localStorage.setItem("currentCategory", String(firstRestCat.id));
-			} else {
-				localStorage.removeItem("currentCategory");
-			}
-			switchMode("restaurant");
-			const catId = localStorage.getItem("currentCategory");
-			if (catId) {
-				const filtered = products.filter((p) => p.categoryId === Number(catId));
-				renderProducts(filtered);
-			} else {
-				menuMain.innerHTML = "";
+			if (getCurrentMenu() === "restaurant") return;
+
+			const selectedId = changeMenu("restaurant");
+
+			if (selectedId != null) {
+				renderProducts(getProductsByCategory(selectedId));
 			}
 		});
 	}
@@ -85,22 +97,22 @@ document.addEventListener("DOMContentLoaded", () => {
 			categoriesContainer.querySelectorAll("li").forEach((n) => n.classList.remove("selected"));
 			li.classList.add("selected");
 
-			const categoryId = Number(li.dataset.categoryId);
-			if (Number.isNaN(categoryId)) return;
-			localStorage.setItem("currentCategory", String(categoryId));
+			const raw = li.dataset.categoryId;
+			const categoryId = raw !== undefined ? Number(raw) : NaN;
+			if (!Number.isFinite(categoryId)) return;
+			safeLocal.set("currentCategory", String(categoryId));
 
 			const filteredProducts = products.filter((p) => p.categoryId === categoryId);
 			renderProducts(filteredProducts);
 		});
 	}
 
-	// initialize UI and content for the current menu
-	switchMode(currentMenu);
-	const initCat = localStorage.getItem("currentCategory");
-	if (initCat) {
+	// initialize UI and content for the current menu (use returned selected id)
+	const initCat = changeMenu(getCurrentMenu());
+	if (initCat != null) {
 		const filtered = products.filter((p) => p.categoryId === Number(initCat));
 		renderProducts(filtered);
 	} else {
-		menuMain.innerHTML = "";
+		renderProducts([]);
 	}
 });
