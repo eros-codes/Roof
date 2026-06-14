@@ -127,15 +127,23 @@
 }
 
 :root{
-	--background-color: #485b47;
+	--background-color: #b3b7ba;
 
-	--header-color: #121314;
+    --primary-color: #090f15;
+    --secondary-color: #d3d1ce;
+    --tertiary-color: #6c6d74;
+
+	--header-color: #262e36;
 	--header-options: #faf7fa;
-	--header-options-hover: #32372C;
+	--header-options-hover: #6c6d74;
+    --nav-category: #262e36;
+    --nav-category-hover: #090f15;
 
-	--black-olive: #3B3C36;
-	--carbon-black: #121314;
-	--flora-white: #faf7ef;
+  --arctic: #d3d1ce;
+  --apres: #6c6d74;
+  --slopes: #b3b7ba;
+  --midnight: #090f15;
+  --mountain: #262e36;
 }
 
 html, body{

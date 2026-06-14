@@ -11,35 +11,23 @@
 <body>
 	<header class="menu-header">
 		<div class="menu-header-top">
-			<input type="text" placeholder="جستجو....">
+			<div class="menu-header-right">
+				<div class="menu-logo">
+					<img src="../../../public/assets/images/Logo-2.PNG" alt="logo">
+				</div>
+				<input type="text" placeholder="جستجو....">
+			</div>
 			<div class="menu-options">
-				<button>کافه</button>
-				<button>رستوران</button>
+				<button id="cafe-cats" data-menu="cafe">کافه</button>
+				<button id="rest-cats" data-menu="restaurant">رستوران</button>
 			</div>
 		</div>
 		<nav class="menu-nav">
-			<ul class="menu-cafe-categories">
-				<li><a href="#">همه</a></li>
-				<li><a href="#">قهوه</a></li>
-				<li><a href="#">میلک شیک</a></li>
-				<li><a href="#">چای</a></li>
-				<li><a href="#">بار گرم</a></li>
-				<li><a href="#">بار سرد</a></li>
-				<li><a href="#">ماکتیل</a></li>
-				<li><a href="#">کیک و دسر</a></li>
-			</ul>
-			<ul class="menu-restaurant-categories">
-				<li><a href="#">همه</a></li>
-				<li><a href="#">پیش غذا</a></li>
-				<li><a href="#">سالاد</a></li>
-				<li><a href="#">سالاد</a></li>
-				<li><a href="#">برگر</a></li>
-				<li><a href="#">پیتزا</a></li>
-				<li><a href="#">پنینی</a></li>
-				<li><a href="#">پاستا</a></li>
-				<li><a href="#">تاکو</a></li>
-				<li><a href="#">نوشیدنی</a></li>
+			<ul class="menu-categories">
 			</ul>
 		</nav>
 	</header>
+
+	<script type="module" src="menu.js"></script>
 </body>
+</html>
