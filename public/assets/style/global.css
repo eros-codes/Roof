@@ -159,7 +159,9 @@
 html,
 body {
 	font-family: "Lora", "Baloo Bhaijaan 2", serif;
+    font-size: 14px;
 	min-height: 100dvh;
 	width: 100%;
 	background-color: var(--background-color);
+	box-sizing: border-box;
 }

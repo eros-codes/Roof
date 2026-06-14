@@ -8,6 +8,8 @@
 	position: sticky;
 	top: 0;
 	z-index: 100;
+	backdrop-filter: blur(1px);
+	padding-bottom: 0.5rem;
 }
 .menu-header-top {
 	padding: 1rem 1rem;

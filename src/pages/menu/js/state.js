@@ -23,6 +23,7 @@ export const products = [
 		price: 95000,
 		categoryId: 1,
 		description: "قهوه خالص با عصاره‌گیری حرفه‌ای",
+		image: "test.png",
 	},
 
 	{
@@ -31,6 +32,7 @@ export const products = [
 		price: 110000,
 		categoryId: 1,
 		description: "اسپرسو به همراه آب داغ",
+		image: "test.png",
 	},
 
 	{
@@ -39,5 +41,6 @@ export const products = [
 		price: 125000,
 		categoryId: 1,
 		description: "اسپرسو، شیر بخار داده شده و فوم شیر",
+		image: "test.png",
 	},
 ];
