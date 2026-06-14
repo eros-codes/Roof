@@ -55,8 +55,8 @@
 .food-name {
 	font-size: 18px;
 	font-weight: 700;
+	line-height: 1.5;
 	color: var(--primary-text-color);
-	line-height: 1.1;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;

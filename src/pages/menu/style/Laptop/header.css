@@ -37,39 +37,26 @@
 	height: 100%;
 	object-fit: cover;
 }
-.menu-header-top input {
-	width: 100%;
-	padding: 0.5rem 1rem;
-	border-radius: 20px;
-	border: none;
-	background-color: var(--header-options);
-	font-family: inherit;
-	font-size: 16px;
-}
-.menu-header-top input::placeholder {
-	color: var(--tertiary-text-color);
-}
 .menu-options {
 	width: 40%;
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	justify-content: end;
-	gap: 0.5rem;
+	gap: 1rem;
+	padding: 0 1rem;
 }
 .menu-options button {
-	padding: 0.5rem 1rem;
-	border-radius: 1rem;
+	padding: 0.5rem 0;
 	border: none;
-	background-color: var(--header-options);
-	color: var(--primary-text-color);
+	background: none;
+	color: var(--secondary-text-color);
 	font-family: inherit;
 	cursor: pointer;
-	transition: background-color 0.3s ease;
+	transition: border-bottom 0.3s ease, color 0.3s ease;
 }
 .menu-options button:hover {
-	background-color: var(--header-options-hover);
-	color: var(--secondary-text-color);
+	border-bottom: 2px solid var(--header-options-hover);
 }
 .menu-nav {
 	width: 100%;
@@ -104,6 +91,10 @@
 	text-decoration: none;
 	white-space: nowrap;
 	color: inherit;
+}
+.menu-options button.selected {
+	color: white;
+	border-bottom: 2px solid var(--header-options-hover);
 }
 .menu-categories li.selected{
 	background-color: var(--header-options-hover);
