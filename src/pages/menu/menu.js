@@ -1,4 +1,4 @@
-import { products, categories } from "./js/state.js";
+import { products } from "./js/state.js";
 import { changeMenu } from "./js/header.js";
 import { createCard } from "../../components/product-card/createCard.js";
 
@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	const restCats = document.getElementById("rest-cats");
 	const menuMain = document.querySelector(".menu-main");
 
+	// localStorage helpers
 	const safeLocal = {
 		get(key, fallback = null) {
 			try {
@@ -56,15 +57,6 @@ document.addEventListener("DOMContentLoaded", () => {
 		menuMain.appendChild(fragment);
 	}
 
-	// On first visit: if no menu set, default to 'cafe' and set its first category
-	if (!safeLocal.get("currentMenu", null)) {
-		safeLocal.set("currentMenu", "cafe");
-		const firstCafeCat = categories.find((c) => c.type === "cafe");
-		if (firstCafeCat) {
-			safeLocal.set("currentCategory", String(firstCafeCat.id));
-		}
-	}
-
 	// Render categories for the current menu type
 	if (cafeCats) {
 		cafeCats.addEventListener("click", () => {
@@ -89,6 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		});
 	}
 
+	// Handle category selection and product rendering
 	if (categoriesContainer && menuMain) {
 		categoriesContainer.addEventListener("click", (e) => {
 			const li = e.target.closest("li");
@@ -102,16 +95,14 @@ document.addEventListener("DOMContentLoaded", () => {
 			if (!Number.isFinite(categoryId)) return;
 			safeLocal.set("currentCategory", String(categoryId));
 
-			const filteredProducts = products.filter((p) => p.categoryId === categoryId);
-			renderProducts(filteredProducts);
+			renderProducts(getProductsByCategory(categoryId));
 		});
 	}
 
-	// initialize UI and content for the current menu (use returned selected id)
+	// initialize UI and content for the current menu
 	const initCat = changeMenu(getCurrentMenu());
 	if (initCat != null) {
-		const filtered = products.filter((p) => p.categoryId === Number(initCat));
-		renderProducts(filtered);
+		renderProducts(getProductsByCategory(initCat));
 	} else {
 		renderProducts([]);
 	}

@@ -14,7 +14,7 @@
 	display: flex;
 	flex-direction: column;
 	background: transparent;
-	border-radius: 0.75rem;
+	border-radius: 1.75rem;
 	overflow: hidden;
 	box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
 	transition:

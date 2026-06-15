@@ -37,8 +37,7 @@ export function toggleCategories(active = "cafe") {
 export function renderCategories(type) {
 	const categoriesContainer = document.querySelector(".menu-categories");
 	if (!categoriesContainer) return;
-
-	let currentCategoryRaw = safeGetItem("currentCategory", null);
+	const currentCategoryRaw = safeGetItem("currentCategory", null);
 
 	categoriesContainer.innerHTML = "";
 	const fragment = document.createDocumentFragment();
@@ -49,19 +48,10 @@ export function renderCategories(type) {
 		return;
 	}
 
-	// ensure currentCategory belongs to this menu type; otherwise default to first category
-	const currentCategoryNum = currentCategoryRaw !== null ? Number(currentCategoryRaw) : NaN;
-	const belongsToType = Number.isFinite(currentCategoryNum) && filtered.some((cat) => cat.id === currentCategoryNum);
-	if (!Number.isFinite(currentCategoryNum) || !belongsToType) {
-		const first = filtered[0];
-		safeSetItem("currentCategory", String(first.id));
-		currentCategoryRaw = String(first.id);
-	}
-
 	filtered.forEach((cat) => {
 		const li = document.createElement("li");
 		li.dataset.categoryId = cat.id;
-		if (Number(currentCategoryRaw) === cat.id) {
+		if (currentCategoryRaw !== null && Number(currentCategoryRaw) === cat.id) {
 			li.classList.add("selected");
 		}
 		const a = document.createElement("a");
