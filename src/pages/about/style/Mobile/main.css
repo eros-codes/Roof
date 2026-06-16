@@ -170,6 +170,10 @@ main.about-main div.top-items div.items div.item{
     height: 100%;
     background-color: white;
     border-radius: 5px;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: start;
+    align-items: center;
 }
 
 
