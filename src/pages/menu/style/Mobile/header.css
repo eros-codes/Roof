@@ -162,8 +162,8 @@
 }
 .drawer-close {
 	position: absolute;
-	top: 12px;
-	right: 12px;
+	top: 1.5rem;
+	right: 2rem;
 	background: none;
 	border: none;
 	font-size: 24px;
@@ -183,4 +183,47 @@
 	font-weight: 600;
 	text-decoration: none;
 	font-size: 16px;
+}
+.drawer-logo {
+	width: 56px;
+	height: auto;
+	position: absolute;
+	top: 1rem;
+	left: 1rem;
+}
+
+.menu-footer-links {
+	padding: 0;
+	margin: 0;
+}
+.menu-footer-links li {
+	list-style: none;
+}
+.menu-footer-links li svg {
+	width: 1.2rem;
+	height: 1.2rem;
+	color: var(--midnight);
+	opacity: 0.9;
+}
+.menu-footer-links a {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 12px 8px;
+	border-radius: 6px;
+	color: var(--midnight);
+}
+.menu-footer-links a .link-text {
+	flex: 1;
+	text-align: right;
+}
+.menu-footer-links li:hover svg {
+	opacity: 1;
+}
+.menu-footer-links li + li {
+	border-top: 1px solid rgba(0,0,0,0.06);
+}
+.menu-footer-links a:hover {
+	background: rgba(0,0,0,0.03);
 }

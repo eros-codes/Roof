@@ -14,6 +14,9 @@ export const categories = [
 	{ id: 13, name: "پاستا", type: "restaurant" },
 	{ id: 14, name: "تاکو", type: "restaurant" },
 	{ id: 15, name: "نوشیدنی", type: "restaurant" },
+	{ id: 16, name: "نان", type: "breakefast" },
+	{ id: 17, name: "املت", type: "breakefast" },
+	{ id: 18, name: "پنکیک", type: "breakefast" },
 ];
 
 export const products = [
@@ -419,6 +422,88 @@ export const products = [
 		price: 95000,
 		categoryId: 15,
 		description: "اسموتی میوه‌ای با توت تازه",
+		image: "test.png",
+	},
+
+	// breakfast products (categories 16-18)
+	{
+		id: 46,
+		name: "نان با پنیر",
+		price: 42000,
+		categoryId: 16,
+		description: "نان تازه سرو شده با پنیر کرمی",
+		image: "test.png",
+	},
+
+	{
+		id: 47,
+		name: "نان با عسل",
+		price: 38000,
+		categoryId: 16,
+		description: "نان گرم با عسل طبیعی و کره",
+		image: "test.png",
+	},
+
+	{
+		id: 48,
+		name: "نان شیرین کرم",
+		price: 45000,
+		categoryId: 16,
+		description: "نان شیرین با کرم و توت تازه",
+		image: "test.png",
+	},
+
+	{
+		id: 49,
+		name: "املت ساده",
+		price: 60000,
+		categoryId: 17,
+		description: "املت سبک با تخم‌مرغ و سبزیجات معطر",
+		image: "test.png",
+	},
+
+	{
+		id: 50,
+		name: "املت با پنیر",
+		price: 70000,
+		categoryId: 17,
+		description: "املت پفکی با پنیر ذوب‌شده",
+		image: "test.png",
+	},
+
+	{
+		id: 51,
+		name: "املت ویژه",
+		price: 85000,
+		categoryId: 17,
+		description: "املت با قارچ، فلفل و پنیر مخصوص",
+		image: "test.png",
+	},
+
+	{
+		id: 52,
+		name: "پنکیک ساده",
+		price: 75000,
+		categoryId: 18,
+		description: "پنکیک نرم سرو شده با شربت و کره",
+		image: "test.png",
+	},
+
+	{
+		id: 53,
+		name: "پنکیک شکلاتی",
+		price: 90000,
+		categoryId: 18,
+		description: "پنکیک با سس شکلات و خامه تازه",
+		image: "test.png",
+	},
+
+	{
+		id: 54,
+		name: "پنکیک میوه‌ای",
+		price: 95000,
+		categoryId: 18,
+		description: "پنکیک با میوه‌های فصل و عسل طبیعی",
 		image: "test.png",
 	},
 ];
