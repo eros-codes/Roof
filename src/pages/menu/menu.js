@@ -1,11 +1,12 @@
 import { products } from "./js/state.js";
-import { changeMenu } from "./js/header.js";
+import { changeMenu, initMobileDrawer } from "./js/header.js";
 import { createCard } from "../../components/product-card/createCard.js";
 
 document.addEventListener("DOMContentLoaded", () => {
 	const categoriesContainer = document.querySelector(".menu-categories");
 	const cafeCats = document.getElementById("cafe-cats");
 	const restCats = document.getElementById("rest-cats");
+	const bfCats = document.getElementById("breakefast-cats");
 	const menuMain = document.querySelector(".menu-main");
 
 	// localStorage helpers
@@ -63,9 +64,10 @@ document.addEventListener("DOMContentLoaded", () => {
 			if (getCurrentMenu() === "cafe") return;
 
 			const selectedId = changeMenu("cafe");
-
 			if (selectedId != null) {
 				renderProducts(getProductsByCategory(selectedId));
+			} else {
+				renderProducts([]);
 			}
 		});
 	}
@@ -74,11 +76,25 @@ document.addEventListener("DOMContentLoaded", () => {
 			if (getCurrentMenu() === "restaurant") return;
 
 			const selectedId = changeMenu("restaurant");
-
 			if (selectedId != null) {
 				renderProducts(getProductsByCategory(selectedId));
+			} else {
+				renderProducts([]);
 			}
 		});
+	}
+	if (bfCats) {
+		bfCats.addEventListener("click", () => {
+			if (getCurrentMenu() === "breakefast") return;
+
+			const selectedId = changeMenu("breakefast");
+			if (selectedId != null) {
+				renderProducts(getProductsByCategory(selectedId));
+			} else {
+				renderProducts([]);
+			}
+
+		})
 	}
 
 	// Handle category selection and product rendering
@@ -105,5 +121,12 @@ document.addEventListener("DOMContentLoaded", () => {
 		renderProducts(getProductsByCategory(initCat));
 	} else {
 		renderProducts([]);
+	}
+
+	// initialize mobile drawer (if present)
+	try {
+		if (typeof initMobileDrawer === "function") initMobileDrawer();
+	} catch (e) {
+		// ignore
 	}
 });

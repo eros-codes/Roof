@@ -1,0 +1,66 @@
+.menu-footer {
+	background-color: var(--footer-color);
+	color: var(--header-options);
+	padding: 1.5rem 5rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1rem;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+.menu-footer > div {
+	width: 100%;
+	display: flex;
+	flex-direction: row-reverse;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+}
+.menu-footer-top {
+	display: flex;
+	flex-direction: row;
+	align-items: end;
+	justify-content: center;
+	gap: 0.5rem;
+}
+.menu-footer-title {
+	direction: ltr;
+	text-align: left;
+	font-size: 1.5rem;
+	color: var(--header-options);
+}
+.menu-footer-subtitle {
+	direction: ltr;
+	font-size: 1.1rem;
+	color: var(--secondary-text-color);
+}
+.menu-footer-links {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 2rem;
+}
+.menu-footer-links a {
+	color: var(--secondary-text-color);
+	text-decoration: none;
+	transition: color .15s ease;
+}
+.menu-footer-links a:hover {
+	color: var(--nav-category-hover);
+}
+.menu-footer-copyright {
+	color: var(--secondary-text-color);
+	font-size: 0.8rem;
+	font-weight: 400;
+}
+.menu-footer-credit {
+	color: var(--secondary-text-color);
+	font-size: 12px;
+	text-align: right;
+}
+.drawer-backdrop, .mobile-drawer {
+	display: none;
+}

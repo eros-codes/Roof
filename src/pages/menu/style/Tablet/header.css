@@ -112,3 +112,7 @@
 	background-color: var(--header-options-hover);
 	color: var(--secondary-text-color);
 }
+
+.mobile-hamburger {
+	display: none;
+}
