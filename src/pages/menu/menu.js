@@ -1,5 +1,6 @@
-import { products } from "./js/state.js";
-import { changeMenu, initMobileDrawer } from "./js/header.js";
+import { products } from "./js/mock-state.js";
+import { changeMenu } from "./js/header.js";
+import { initMobileDrawer } from "../../../public/assets/js/main.js";
 import { createCard } from "../../components/product-card/createCard.js";
 
 document.addEventListener("DOMContentLoaded", () => {

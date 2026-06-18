@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fa">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>نظرات | روف</title>
+		<link rel="stylesheet" href="./style/main.css" />
+	</head>
+	<body>
+		<header class="menu-header">
+			<div class="menu-header-top">
+				<div class="menu-header-right">
+					<button id="mobile-hamburger" class="mobile-hamburger" aria-label="opemimg menu">
+						<span class="hamburger-icon">
+							<span></span>
+							<span></span>
+							<span></span>
+						</span>
+					</button>
+					<div class="menu-logo">
+						<img src="../../../public/assets/images/Logo-2.PNG" alt="logo">
+					</div>
+				</div>
+			</div>
+		</header>
+
+		<main class="feedback-page">
+
+			<section class="chat-section">
+				<div class="chat-container">
+
+					<div class="chat-header">
+						<div class="chat-avatar">R</div>
+						<div class="chat-meta">
+							<h2 class="chat-name">روف</h2>
+							<span class="chat-status">
+								<span class="status-dot"></span>
+								آنلاین
+							</span>
+						</div>
+					</div>
+
+					<div class="chat-window">
+						<div class="chat-messages" id="chat-messages"></div>
+					</div>
+
+					<div class="chat-controls" dir="ltr">
+
+						<button class="ctrl-btn" id="next-btn" aria-label="نظر بعدی">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+								stroke-linejoin="round">
+								<polyline points="9 18 15 12 9 6"></polyline>
+							</svg>
+						</button>
+
+						<button class="ctrl-btn ctrl-btn--pause" id="pause-btn" aria-label="توقف">
+							<svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor">
+								<rect x="6" y="4" width="4" height="16" rx="1"></rect>
+								<rect x="14" y="4" width="4" height="16" rx="1"></rect>
+							</svg>
+							<svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+								<polygon points="5 3 19 12 5 21 5 3"></polygon>
+							</svg>
+						</button>
+
+						<button class="ctrl-btn" id="prev-btn" aria-label="نظر قبلی">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+								stroke-linejoin="round">
+								<polyline points="15 18 9 12 15 6"></polyline>
+							</svg>
+						</button>
+						
+					</div>
+
+					<div class="chat-dots" id="chat-dots"></div>
+
+				</div>
+			</section>
+
+			<section class="form-section">
+				<div class="form-container">
+
+					<div class="form-header">
+						<h2 class="form-title">نظر شما</h2>
+						<p class="form-subtitle">تجربه‌تان را با ما به اشتراک بگذارید</p>
+					</div>
+
+					<form id="feedback-form" class="feedback-form" novalidate>
+
+						<div class="field-group">
+							<label for="review-name" class="field-label">
+								نام
+								<span class="optional">(اختیاری)</span>
+							</label>
+							<input
+								type="text"
+								id="review-name"
+								name="name"
+								class="field-input"
+								placeholder="نام شما"
+								autocomplete="name"
+							/>
+						</div>
+
+						<div class="field-group">
+							<label for="review-text" class="field-label">نظر</label>
+							<textarea
+								id="review-text"
+								name="review"
+								class="field-input field-textarea"
+								placeholder="تجربه‌تان را بنویسید..."
+								required
+								maxlength="100"
+							></textarea>
+							<span class="char-count" id="char-count" dir="ltr">۰ / ۱۰۰</span>
+						</div>
+
+						<button type="submit" class="submit-btn" id="submit-btn">
+							<span class="submit-text">ثبت نظر</span>
+							<span class="submit-icon" aria-hidden="true">←</span>
+						</button>
+
+					</form>
+
+					<div class="form-feedback" id="form-feedback" role="status" aria-live="polite"></div>
+
+				</div>
+			</section>
+		</main>
+		<footer class="menu-footer">
+			<div>
+				<div class="menu-footer-top">
+					<h6 class="menu-footer-subtitle">your daily escape</h6>
+					<h4 class="menu-footer-title">Roof,</h4>
+				</div>
+				<div>
+					<ul class="menu-footer-links">
+						<li><a href="../about/about.html">درباره ما</a></li>
+						<li><a href="../about/about.html">تماس با ما</a></li>
+						<li><a href="../menu/menu.html">منو</a></li>
+					</ul>
+				</div>
+			</div>
+			<h6 class="menu-footer-copyright">تمامی حقوق این سایت متعلق به کافه روف می باشد.</h6>
+			<h6 class="menu-footer-credit">Made with love 🤍 Eros & Nord </h6>
+		</footer>
+		
+		<div id="drawer-backdrop" class="drawer-backdrop"></div>
+		<aside id="mobile-drawer" class="mobile-drawer" aria-hidden="true">
+			<button id="drawer-close" class="drawer-close" aria-label="بستن منو">&times;</button>
+			<img src="../../../public/assets/images/Logo-3.PNG" alt="logo" class="drawer-logo">
+			<nav class="mobile-drawer-nav">
+				<ul class="menu-footer-links">
+					<li>
+						<a href="../about/about.html">
+							<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+								<path d="M0 0h24v24H0z" fill="none" />
+								<path fill="currentColor"
+									d="M11 17h2v-6h-2zm1.713-8.287Q13 8.425 13 8t-.288-.712T12 7t-.712.288T11 8t.288.713T12 9t.713-.288M12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8" />
+							</svg>
+							<span class="link-text">درباره ما</span>
+						</a>
+					</li>
+					<li>
+						<a href="../about/about.html">
+							<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 12 12">
+								<path d="M0 0h12v12H0z" fill="none" />
+								<path fill="currentColor"
+									d="M5.561 2.551a.84.84 0 0 0-1.033-.514c-.973.3-1.653 1.135-1.507 2.101A8.7 8.7 0 0 0 4.092 7.18a8.8 8.8 0 0 0 2.083 2.445c.754.61 1.812.442 2.558-.258A.85.85 0 0 0 8.81 8.21l-.534-.653a.845.845 0 0 0-.91-.272l-1.232.39l-.215-.222a5 5 0 0 1-.706-.929a4.8 4.8 0 0 1-.446-1.079l-.083-.295l.95-.875a.86.86 0 0 0 .221-.935zm-1.327-1.47a1.84 1.84 0 0 1 2.264 1.121l.293.788a1.86 1.86 0 0 1-.48 2.019l-.49.451c.063.174.148.373.258.566c.11.19.238.363.355.504l.63-.2a1.845 1.845 0 0 1 1.985.593l.534.653a1.85 1.85 0 0 1-.166 2.52c-.994.933-2.617 1.32-3.87.306a9.8 9.8 0 0 1-2.32-2.722a9.7 9.7 0 0 1-1.195-3.393c-.24-1.593.903-2.806 2.202-3.205" />
+							</svg>
+							<span class="link-text">تماس با ما</span>
+						</a>
+					</li>
+					<li>
+						<a href="../menu/menu.html">
+							<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 32 32">
+								<path d="M0 0h32v32H0z" fill="none" />
+								<g fill="none" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+										d="M10 9h4m-4 7h12m-12 4h12m-12 4h4m-6 5h16a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v22a2 2 0 0 0 2 2" />
+									<circle cx="22" cy="9" r=".5" fill="currentColor" />
+								</g>
+							</svg>
+							<span class="link-text">منو</span>
+						</a>
+					</li>
+				</ul>
+			</nav>
+		</aside>
+
+		<script type="module" src="./feedback.js"></script>
+	</body>
+</html>
