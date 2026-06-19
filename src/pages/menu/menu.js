@@ -1,9 +1,9 @@
-import { products } from "./js/mock-state.js";
 import { changeMenu } from "./js/header.js";
+import { fetchCategories, fetchProducts } from "./js/api.js";
 import { initMobileDrawer } from "../../../public/assets/js/main.js";
 import { createCard } from "../../components/product-card/createCard.js";
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
 	const categoriesContainer = document.querySelector(".menu-categories");
 	const cafeCats = document.getElementById("cafe-cats");
 	const restCats = document.getElementById("rest-cats");
@@ -36,8 +36,15 @@ document.addEventListener("DOMContentLoaded", () => {
 	function getCurrentMenu() {
 		return safeLocal.get("currentMenu", "cafe");
 	}
-	function getProductsByCategory(categoryId) {
-		return products.filter((product) => product.categoryId === categoryId);
+
+	async function getProductsByCategory(categoryId) {
+		try {
+			const prods = await fetchProducts(categoryId);
+			return Array.isArray(prods) ? prods : [];
+		} catch (e) {
+			console.error("Failed to fetch products:", e);
+			return [];
+		}
 	}
 	
 	function renderProducts(productsList) {
@@ -61,36 +68,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	// Render categories for the current menu type
 	if (cafeCats) {
-		cafeCats.addEventListener("click", () => {
+		cafeCats.addEventListener("click", async () => {
 			if (getCurrentMenu() === "cafe") return;
 
-			const selectedId = changeMenu("cafe");
+			const selectedId = changeMenu("cafe", window.__categories__);
 			if (selectedId != null) {
-				renderProducts(getProductsByCategory(selectedId));
+				const prods = await getProductsByCategory(selectedId);
+				renderProducts(prods);
 			} else {
 				renderProducts([]);
 			}
 		});
 	}
 	if (restCats) {
-		restCats.addEventListener("click", () => {
+		restCats.addEventListener("click", async () => {
 			if (getCurrentMenu() === "restaurant") return;
 
-			const selectedId = changeMenu("restaurant");
+			const selectedId = changeMenu("restaurant", window.__categories__);
 			if (selectedId != null) {
-				renderProducts(getProductsByCategory(selectedId));
+				const prods = await getProductsByCategory(selectedId);
+				renderProducts(prods);
 			} else {
 				renderProducts([]);
 			}
 		});
 	}
 	if (bfCats) {
-		bfCats.addEventListener("click", () => {
+		bfCats.addEventListener("click", async () => {
 			if (getCurrentMenu() === "breakefast") return;
 
-			const selectedId = changeMenu("breakefast");
+			const selectedId = changeMenu("breakefast", window.__categories__);
 			if (selectedId != null) {
-				renderProducts(getProductsByCategory(selectedId));
+				const prods = await getProductsByCategory(selectedId);
+				renderProducts(prods);
 			} else {
 				renderProducts([]);
 			}
@@ -100,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	// Handle category selection and product rendering
 	if (categoriesContainer && menuMain) {
-		categoriesContainer.addEventListener("click", (e) => {
+		categoriesContainer.addEventListener("click", async (e) => {
 			const li = e.target.closest("li");
 			if (!li || !categoriesContainer.contains(li)) return;
 			e.preventDefault();
@@ -112,14 +122,28 @@ document.addEventListener("DOMContentLoaded", () => {
 			if (!Number.isFinite(categoryId)) return;
 			safeLocal.set("currentCategory", String(categoryId));
 
-			renderProducts(getProductsByCategory(categoryId));
+			const prods = await getProductsByCategory(categoryId);
+			renderProducts(prods);
 		});
 	}
 
 	// initialize UI and content for the current menu
-	const initCat = changeMenu(getCurrentMenu());
+	// fetch categories from API and initialize
+	let categories = [];
+	try {
+		categories = await fetchCategories();
+		// expose categories to header handlers via a small global reference
+		window.__categories__ = categories;
+	} catch (e) {
+		console.error("Failed to load categories:", e);
+		categories = [];
+		window.__categories__ = categories;
+	}
+
+	const initCat = changeMenu(getCurrentMenu(), categories);
 	if (initCat != null) {
-		renderProducts(getProductsByCategory(initCat));
+		const prods = await getProductsByCategory(initCat);
+		renderProducts(prods);
 	} else {
 		renderProducts([]);
 	}

@@ -1,3 +1,5 @@
+import { postReview } from "./api.js";
+
 export function initForm() {
 	const form = document.getElementById("feedback-form");
 	const textarea = document.getElementById("review-text");
@@ -17,7 +19,7 @@ export function initForm() {
 	});
 
 	//  Submit
-	form.addEventListener("submit", (e) => {
+	form.addEventListener("submit", async (e) => {
 		e.preventDefault();
 
 		const name = form.querySelector("#review-name")?.value.trim() || null;
@@ -29,32 +31,37 @@ export function initForm() {
 			return;
 		}
 
-		const entry = {
-			id: Date.now(),
-			name,
-			text,
-			reply: null,
-			date: new Date().toLocaleDateString("fa-IR"),
-			visible: false, // shown only after admin approval
-		};
-
-		// Persist to localStorage (pending queue)
-		try {
-			const pending = JSON.parse(localStorage.getItem("pendingReviews") || "[]");
-			pending.push(entry);
-			localStorage.setItem("pendingReviews", JSON.stringify(pending));
-		} catch (_) {
-			// localStorage unavailable — silent fail
-		}
-
 		setLoading(true);
 
-		setTimeout(() => {
+		try {
+			await postReview({ name, text });
 			setLoading(false);
 			form.reset();
 			charCount.textContent = `۰ / ${MAX.toLocaleString("fa-IR")}`;
-			showFeedback("نظر شما ثبت شد 🙏", "success");
-		}, 700);
+			showFeedback("نظر شما ثبت شد و پس از بررسی نمایش داده خواهد شد 🙏", "success");
+		} catch (err) {
+			// Fallback: store in pending queue in localStorage
+			try {
+				const entry = {
+					id: Date.now(),
+					name,
+					text,
+					reply: null,
+					date: new Date().toLocaleDateString("fa-IR"),
+					visible: false,
+				};
+				const pending = JSON.parse(localStorage.getItem("pendingReviews") || "[]");
+				pending.push(entry);
+				localStorage.setItem("pendingReviews", JSON.stringify(pending));
+			} catch (_) {
+				// ignore localStorage errors
+			}
+
+			setLoading(false);
+			form.reset();
+			charCount.textContent = `۰ / ${MAX.toLocaleString("fa-IR")}`;
+			showFeedback("اتصال به سرور برقرار نشد؛ نظر شما آفلاین ذخیره شد.", "success");
+		}
 	});
 
 	// Helpers 

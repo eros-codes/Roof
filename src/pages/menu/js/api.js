@@ -1,18 +1,16 @@
-/**
- * Menu API helpers (page-local).
- * This file is intentionally standalone and NOT imported anywhere automatically.
- */
-export async function fetchCategories({ url = "/api/categories", signal } = {}) {
-  const res = await fetch(url, { signal });
-  if (!res.ok) throw new Error(`Fetch ${url} failed: ${res.status} ${res.statusText}`);
-  const data = await res.json();
-  return Array.isArray(data) ? data : data.categories ?? [];
+const BASE = "http://localhost:4000/api";
+
+export async function fetchCategories() {
+	const res = await fetch(`${BASE}/categories`);
+	if (!res.ok) throw new Error("خطا در دریافت دسته‌بندی‌ها");
+	return res.json();
 }
 
-export async function fetchProducts({ url = "/api/products", signal } = {}) {
-  const res = await fetch(url, { signal });
-  if (!res.ok) throw new Error(`Fetch ${url} failed: ${res.status} ${res.statusText}`);
-  const data = await res.json();
-  return Array.isArray(data) ? data : data.products ?? [];
+export async function fetchProducts(categoryId) {
+	const url = categoryId
+		? `${BASE}/products?categoryId=${categoryId}`
+		: `${BASE}/products`;
+	const res = await fetch(url);
+	if (!res.ok) throw new Error("خطا در دریافت محصولات");
+	return res.json();
 }
-

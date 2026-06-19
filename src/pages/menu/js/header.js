@@ -1,5 +1,3 @@
-import { categories } from "./mock-state.js";
-
 function safeGetItem(key, fallback = null) {
 	try {
 		const v = localStorage.getItem(key);
@@ -39,7 +37,7 @@ export function toggleCategories(active = "cafe") {
 	}
 }
 
-export function renderCategories(type) {
+export function renderCategories(type, categories) {
 	const categoriesContainer = document.querySelector(".menu-categories");
 	if (!categoriesContainer) return;
 	const currentCategoryRaw = safeGetItem("currentCategory", null);
@@ -47,7 +45,7 @@ export function renderCategories(type) {
 	categoriesContainer.innerHTML = "";
 	const fragment = document.createDocumentFragment();
 
-	const filtered = categories.filter((cat) => cat.type === type);
+	const filtered = (categories || []).filter((cat) => cat.type === type);
 	if (filtered.length === 0) {
 		categoriesContainer.appendChild(fragment);
 		return;
@@ -69,12 +67,12 @@ export function renderCategories(type) {
 	categoriesContainer.appendChild(fragment);
 }
 
-export function changeMenu(menuType) {
+export function changeMenu(menuType, categories) {
 	// set current menu and update header UI/categories list
 	safeSetItem("currentMenu", menuType);
 
 	// decide which category should be selected for this menu
-	const filtered = categories.filter((c) => c.type === menuType);
+	const filtered = (categories || []).filter((c) => c.type === menuType);
 	const currentCategoryRaw = safeGetItem("currentCategory", null);
 	const currentCategoryNum = currentCategoryRaw !== null ? Number(currentCategoryRaw) : NaN;
 	const belongsToType = Number.isFinite(currentCategoryNum) && filtered.some((cat) => cat.id === currentCategoryNum);
@@ -89,7 +87,7 @@ export function changeMenu(menuType) {
 	}
 
 	toggleCategories(menuType);
-	renderCategories(menuType);
+	renderCategories(menuType, categories);
 
 	return selectedCategoryId;
 }

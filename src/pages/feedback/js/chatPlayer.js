@@ -1,8 +1,9 @@
-import { reviews } from "./mock-state.js";
+import { fetchReviews } from "./api.js";
 import { createExchange } from "../../../components/messages/messages.js";
 
+let reviewsCache = [];
 function getVisible() {
-	return reviews.filter((r) => r.visible);
+	return reviewsCache.filter((r) => r.visible);
 }
 const DURATION = 4000; // ms between auto-advances
 const ANIM_MS = 450;   // must match CSS animation duration
@@ -101,7 +102,18 @@ function syncPauseBtn() {
 }
 
 // Public init
-export function initChatPlayer() {
+export async function initChatPlayer() {
+	try {
+		const res = await fetchReviews();
+		// Map createdAt -> date (localized) for compatibility with createExchange
+		reviewsCache = Array.isArray(res)
+			? res.map((r) => ({ ...r, date: r.createdAt ? new Date(r.createdAt).toLocaleDateString("fa-IR") : null }))
+			: [];
+	} catch (e) {
+		console.error("Failed to load reviews:", e);
+		reviewsCache = [];
+	}
+
 	const visible = getVisible();
 	const container = document.getElementById("chat-messages");
 	const chatWindow = document.querySelector(".chat-window");
