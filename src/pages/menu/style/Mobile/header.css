@@ -101,3 +101,129 @@
 	background-color: var(--header-options-hover);
 	color: var(--secondary-text-color);
 }
+
+.mobile-hamburger {
+	background: none;
+	border: none;
+	color: var(--header-options);
+	font-size: 20px;
+	width: 3rem;
+	height: 3rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+}
+.mobile-hamburger .hamburger-icon {
+	display: inline-flex;
+	flex-direction: column;
+	gap: 4px;
+}
+.mobile-hamburger .hamburger-icon span {
+	display: block;
+	width: 20px;
+	height: 2px;
+	background: var(--header-options);
+	border-radius: 2px;
+}
+.drawer-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(0,0,0,0.28);
+	backdrop-filter: blur(4px);
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity .25s ease, visibility .25s ease;
+	z-index: 100;
+}
+.drawer-backdrop.visible {
+	opacity: 1;
+	visibility: visible;
+}
+.mobile-drawer {
+	position: fixed;
+	right: 0;
+	top: 0;
+	height: 100dvh;
+	width: min(80vw, 360px);
+	max-width: 360px;
+	background: var(--card-color);
+	color: var(--midnight);
+	transform: translateX(100vw);
+	transition: transform .38s cubic-bezier(0.22, 1, 0.36, 1);
+	z-index: 100;
+	box-shadow: 0 6px 30px rgba(0,0,0,0.25);
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+}
+.mobile-drawer.open {
+	transform: translateX(0);
+}
+.drawer-close {
+	position: absolute;
+	top: 1.5rem;
+	right: 2rem;
+	background: none;
+	border: none;
+	font-size: 24px;
+	color: var(--midnight);
+	cursor: pointer;
+}
+.mobile-drawer-nav {
+	margin-top: 48px;
+}
+.mobile-drawer-nav .menu-footer-links {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+.mobile-drawer-nav .menu-footer-links a {
+	color: var(--midnight);
+	font-weight: 600;
+	text-decoration: none;
+	font-size: 16px;
+}
+.drawer-logo {
+	width: 56px;
+	height: auto;
+	position: absolute;
+	top: 1rem;
+	left: 1rem;
+}
+
+.menu-footer-links {
+	padding: 0;
+	margin: 0;
+}
+.menu-footer-links li {
+	list-style: none;
+}
+.menu-footer-links li svg {
+	width: 1.2rem;
+	height: 1.2rem;
+	color: var(--midnight);
+	opacity: 0.9;
+}
+.menu-footer-links a {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 12px 8px;
+	border-radius: 6px;
+	color: var(--midnight);
+}
+.menu-footer-links a .link-text {
+	flex: 1;
+	text-align: right;
+}
+.menu-footer-links li:hover svg {
+	opacity: 1;
+}
+.menu-footer-links li + li {
+	border-top: 1px solid rgba(0,0,0,0.06);
+}
+.menu-footer-links a:hover {
+	background: rgba(0,0,0,0.03);
+}

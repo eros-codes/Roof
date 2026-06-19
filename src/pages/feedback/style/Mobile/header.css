@@ -1,0 +1,228 @@
+.menu-header {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	align-items: center;
+	justify-content: center;
+	position: sticky;
+	top: 0;
+	z-index: 100;
+	backdrop-filter: blur(1px);
+}
+.menu-header-top {
+	padding: 1rem 1rem;
+	background-color: var(--header-color);
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.menu-header-right {
+	width: 50%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: start;
+	gap: 1rem;
+}
+.menu-logo {
+	width: 4rem;
+	height: 3rem;
+}
+.menu-logo img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.menu-header-top input {
+	display: none;
+}
+.menu-options {
+	width: 40%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: end;
+	gap: 1rem;
+	padding: 0 1rem;
+}
+.menu-options button {
+	padding: 0.5rem 0;
+	border: none;
+	background: none;
+	color: var(--secondary-text-color);
+	font-family: inherit;
+	cursor: pointer;
+	transition: border-bottom 0.3s ease, color 0.3s ease;
+}
+.menu-nav {
+	width: 100%;
+	scrollbar-color: transparent transparent;
+	scrollbar-width: none;
+}
+.menu-categories {
+	padding: 0 0.5rem;
+	width: 100%;
+	overflow-x: auto;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: start;
+	gap: 0.5rem;
+}
+.menu-categories li {
+	list-style: none;
+	padding: 0.5rem 1.5rem;
+	border-radius: 1rem;
+	background-color: var(--header-color);
+	color: var(--secondary-text-color);
+	font-size: 1rem;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+.menu-categories li:hover {
+	background-color: var(--header-options-hover);
+	color: var(--secondary-text-color);
+}
+.menu-categories li a {
+	text-decoration: none;
+	white-space: nowrap;
+	color: inherit;
+}
+.menu-options button.selected {
+	color: white;
+	border-bottom: 2px solid var(--header-options-hover);
+}
+.menu-categories li.selected{
+	background-color: var(--header-options-hover);
+	color: var(--secondary-text-color);
+}
+
+.mobile-hamburger {
+	background: none;
+	border: none;
+	color: var(--header-options);
+	font-size: 20px;
+	width: 3rem;
+	height: 3rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+}
+.mobile-hamburger .hamburger-icon {
+	display: inline-flex;
+	flex-direction: column;
+	gap: 4px;
+}
+.mobile-hamburger .hamburger-icon span {
+	display: block;
+	width: 20px;
+	height: 2px;
+	background: var(--header-options);
+	border-radius: 2px;
+}
+.drawer-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(0,0,0,0.28);
+	backdrop-filter: blur(4px);
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity .25s ease, visibility .25s ease;
+	z-index: 100;
+}
+.drawer-backdrop.visible {
+	opacity: 1;
+	visibility: visible;
+}
+.mobile-drawer {
+	position: fixed;
+	right: 0;
+	top: 0;
+	height: 100dvh;
+	width: min(80vw, 360px);
+	max-width: 360px;
+	background: var(--card-color);
+	color: var(--midnight);
+	transform: translateX(100vw);
+	transition: transform .38s cubic-bezier(0.22, 1, 0.36, 1);
+	z-index: 100;
+	box-shadow: 0 6px 30px rgba(0,0,0,0.25);
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+}
+.mobile-drawer.open {
+	transform: translateX(0);
+}
+.drawer-close {
+	position: absolute;
+	top: 1.5rem;
+	right: 2rem;
+	background: none;
+	border: none;
+	font-size: 24px;
+	color: var(--midnight);
+	cursor: pointer;
+}
+.mobile-drawer-nav {
+	margin-top: 48px;
+}
+.mobile-drawer-nav .menu-footer-links {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+.mobile-drawer-nav .menu-footer-links a {
+	color: var(--midnight);
+	font-weight: 600;
+	text-decoration: none;
+	font-size: 16px;
+}
+.drawer-logo {
+	width: 56px;
+	height: auto;
+	position: absolute;
+	top: 1rem;
+	left: 1rem;
+}
+
+.menu-footer-links {
+	padding: 0;
+	margin: 0;
+}
+.menu-footer-links li {
+	list-style: none;
+}
+.menu-footer-links li svg {
+	width: 1.2rem;
+	height: 1.2rem;
+	color: var(--midnight);
+	opacity: 0.9;
+}
+.menu-footer-links a {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 12px 8px;
+	border-radius: 6px;
+	color: var(--midnight);
+}
+.menu-footer-links a .link-text {
+	flex: 1;
+	text-align: right;
+}
+.menu-footer-links li:hover svg {
+	opacity: 1;
+}
+.menu-footer-links li + li {
+	border-top: 1px solid rgba(0,0,0,0.06);
+}
+.menu-footer-links a:hover {
+	background: rgba(0,0,0,0.03);
+}
