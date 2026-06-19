@@ -36,7 +36,7 @@ footer {
 .footer-column p {
     line-height: 1.8;
     margin-bottom: 8px;
-    font-size: 12px;
+    font-size: 11px;
 }
 
 .footer-column a {
@@ -45,7 +45,7 @@ footer {
     color: #403939;
     margin-bottom: 10px;
     transition: 0.3s;
-    font-size: 12px;
+    font-size: 11px;
 }
 
 .footer-column a:hover {

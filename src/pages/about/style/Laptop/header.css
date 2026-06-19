@@ -1,0 +1,28 @@
+header.about-header{
+    width: 100%;
+    height: 80px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 8px 15px;
+}
+header.about-header ul.about{
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+header.about-header ul.about li{
+   width: 100%; 
+}
+header.about-header ul.about li a{
+    font-size: 15px;
+    color: white;
+}
+header img{
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+}
