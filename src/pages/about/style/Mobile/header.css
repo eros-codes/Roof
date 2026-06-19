@@ -15,7 +15,7 @@ header.about-header ul.about{
     align-items: center;
 }
 header.about-header ul.about li{
-    
+   width: 100%; 
 }
 header.about-header ul.about li a{
     font-size: 12px;
