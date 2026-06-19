@@ -1,4 +1,5 @@
 .menu-footer {
+	width: 100%;
 	background-color: var(--footer-color);
 	color: var(--header-options);
 	padding: 1.5rem 5rem;

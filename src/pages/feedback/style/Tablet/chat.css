@@ -11,8 +11,18 @@
 	100% { content: "..."; }
 }
 
+body {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+}
+body > div {
+	width: 100%;
+	min-height: 100%;
+}
+
 .feedback-page {
-	min-height: 100dvh;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -164,4 +174,31 @@
 	.status-dot {
 		animation: none;
 	}
+}
+
+.chat-container.chat-container--empty .chat-controls,
+.chat-container.chat-container--empty .chat-dots {
+	display: none;
+}
+.chat-window--empty {
+	height: 8.5rem;
+}
+.chat-placeholder {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	padding: 0.6rem 1rem;
+	text-align: center;
+	color: var(--tertiary-text-color);
+}
+.chat-placeholder-title {
+	margin: 0 0 0.25rem 0;
+	font-weight: 700;
+	color: var(--secondary-text-color);
+}
+.chat-placeholder-body {
+	margin: 0;
+	font-size: 0.95rem;
 }

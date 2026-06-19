@@ -506,4 +506,31 @@ export const products = [
 		description: "پنکیک با میوه‌های فصل و عسل طبیعی",
 		image: "test.png",
 	},
+
+	{
+		id: 55,
+		name: "پنکیک ساده",
+		price: 75000,
+		categoryId: 18,
+		description: "پنکیک نرم سرو شده با شربت و کره",
+		image: "test.png",
+	},
+
+	{
+		id: 56,
+		name: "پنکیک شکلاتی",
+		price: 90000,
+		categoryId: 18,
+		description: "پنکیک با سس شکلات و خامه تازه",
+		image: "test.png",
+	},
+
+	{
+		id: 57,
+		name: "پنکیک میوه‌ای",
+		price: 95000,
+		categoryId: 18,
+		description: "پنکیک با میوه‌های فصل و عسل طبیعی",
+		image: "test.png",
+	},
 ];

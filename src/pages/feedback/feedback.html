@@ -10,114 +10,118 @@
 </head>
 
 <body>
-	<header class="menu-header">
-		<div class="menu-header-top">
-			<div class="menu-header-right">
-				<button id="mobile-hamburger" class="mobile-hamburger" aria-label="opemimg menu">
-					<span class="hamburger-icon">
-						<span></span>
-						<span></span>
-						<span></span>
-					</span>
-				</button>
-				<div class="menu-logo">
-					<img src="../../../public/assets/images/Logo-2.PNG" alt="logo">
-				</div>
-			</div>
-		</div>
-	</header>
-
-	<main class="feedback-page">
-
-		<section class="chat-section">
-			<div class="chat-container">
-
-				<div class="chat-header">
-					<div class="chat-avatar">R</div>
-					<div class="chat-meta">
-						<h2 class="chat-name">روف</h2>
-						<span class="chat-status">
-							<span class="status-dot"></span>
-							آنلاین
+	<div>
+		<header class="menu-header">
+			<div class="menu-header-top">
+				<div class="menu-header-right">
+					<button id="mobile-hamburger" class="mobile-hamburger" aria-label="opemimg menu">
+						<span class="hamburger-icon">
+							<span></span>
+							<span></span>
+							<span></span>
 						</span>
+					</button>
+					<div class="menu-logo">
+						<img src="../../../public/assets/images/Logo-2.PNG" alt="logo">
 					</div>
 				</div>
-
-				<div class="chat-window">
-					<div class="chat-messages" id="chat-messages"></div>
-				</div>
-
-				<div class="chat-controls" dir="ltr">
-
-					<button class="ctrl-btn" id="next-btn" aria-label="نظر بعدی">
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-							stroke-linecap="round" stroke-linejoin="round">
-							<polyline points="9 18 15 12 9 6"></polyline>
-						</svg>
-					</button>
-
-					<button class="ctrl-btn ctrl-btn--pause" id="pause-btn" aria-label="توقف">
-						<svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor">
-							<rect x="6" y="4" width="4" height="16" rx="1"></rect>
-							<rect x="14" y="4" width="4" height="16" rx="1"></rect>
-						</svg>
-						<svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" style="display:none">
-							<polygon points="5 3 19 12 5 21 5 3"></polygon>
-						</svg>
-					</button>
-
-					<button class="ctrl-btn" id="prev-btn" aria-label="نظر قبلی">
-						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-							stroke-linecap="round" stroke-linejoin="round">
-							<polyline points="15 18 9 12 15 6"></polyline>
-						</svg>
-					</button>
-
-				</div>
-
-				<div class="chat-dots" id="chat-dots"></div>
-
 			</div>
-		</section>
+		</header>
 
-		<section class="form-section">
-			<div class="form-container">
+		<main class="feedback-page">
 
-				<div class="form-header">
-					<h2 class="form-title">نظر شما</h2>
-					<p class="form-subtitle">تجربه‌تان را با ما به اشتراک بگذارید</p>
+			<section class="chat-section">
+				<div class="chat-container">
+
+					<div class="chat-header">
+						<div class="chat-avatar">R</div>
+						<div class="chat-meta">
+							<h2 class="chat-name">روف</h2>
+							<span class="chat-status">
+								<span class="status-dot"></span>
+								آنلاین
+							</span>
+						</div>
+					</div>
+
+					<div class="chat-window">
+						<div class="chat-messages" id="chat-messages"></div>
+					</div>
+
+					<div class="chat-controls" dir="ltr">
+
+						<button class="ctrl-btn" id="next-btn" aria-label="نظر بعدی">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+								stroke-linecap="round" stroke-linejoin="round">
+								<polyline points="9 18 15 12 9 6"></polyline>
+							</svg>
+						</button>
+
+						<button class="ctrl-btn ctrl-btn--pause" id="pause-btn" aria-label="توقف">
+							<svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor">
+								<rect x="6" y="4" width="4" height="16" rx="1"></rect>
+								<rect x="14" y="4" width="4" height="16" rx="1"></rect>
+							</svg>
+							<svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+								<polygon points="5 3 19 12 5 21 5 3"></polygon>
+							</svg>
+						</button>
+
+						<button class="ctrl-btn" id="prev-btn" aria-label="نظر قبلی">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+								stroke-linecap="round" stroke-linejoin="round">
+								<polyline points="15 18 9 12 15 6"></polyline>
+							</svg>
+						</button>
+
+					</div>
+
+					<div class="chat-dots" id="chat-dots"></div>
+
 				</div>
+			</section>
 
-				<form id="feedback-form" class="feedback-form" novalidate>
+			<section class="form-section">
+				<div class="form-container">
 
-					<div class="field-group">
-						<label for="review-name" class="field-label">
-							نام
-							<span class="optional">(اختیاری)</span>
-						</label>
-						<input type="text" id="review-name" name="name" class="field-input" placeholder="نام شما"
-							autocomplete="name" />
+					<div class="form-header">
+						<h2 class="form-title">نظر شما</h2>
+						<p class="form-subtitle">تجربه‌تان را با ما به اشتراک بگذارید</p>
 					</div>
 
-					<div class="field-group">
-						<label for="review-text" class="field-label">نظر</label>
-						<textarea id="review-text" name="review" class="field-input field-textarea"
-							placeholder="تجربه‌تان را بنویسید..." required maxlength="100"></textarea>
-						<span class="char-count" id="char-count" dir="ltr">۰ / ۱۰۰</span>
-					</div>
+					<form id="feedback-form" class="feedback-form" novalidate>
 
-					<button type="submit" class="submit-btn" id="submit-btn">
-						<span class="submit-text">ثبت نظر</span>
-						<span class="submit-icon" aria-hidden="true">←</span>
-					</button>
+						<div class="field-group">
+							<label for="review-name" class="field-label">
+								نام
+								<span class="optional">(اختیاری)</span>
+							</label>
+							<input type="text" id="review-name" name="name" class="field-input" placeholder="نام شما"
+								autocomplete="name" />
+						</div>
 
-				</form>
+						<div class="field-group">
+							<label for="review-text" class="field-label">نظر</label>
+							<textarea id="review-text" name="review" class="field-input field-textarea"
+								placeholder="تجربه‌تان را بنویسید..." required maxlength="100"></textarea>
+							<span class="char-count" id="char-count" dir="ltr">۰ / ۱۰۰</span>
+						</div>
 
-				<div class="form-feedback" id="form-feedback" role="status" aria-live="polite"></div>
+						<button type="submit" class="submit-btn" id="submit-btn">
+							<span class="submit-text">ثبت نظر</span>
+							<span class="submit-icon" aria-hidden="true">←</span>
+						</button>
 
-			</div>
-		</section>
-	</main>
+					</form>
+
+					<div class="form-feedback" id="form-feedback" role="status" aria-live="polite"></div>
+
+				</div>
+			</section>
+		</main>
+	</div>
+
+
 	<footer class="menu-footer">
 		<div>
 			<div class="menu-footer-top">
