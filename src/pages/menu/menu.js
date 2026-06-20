@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	const categoriesContainer = document.querySelector(".menu-categories");
 	const cafeCats = document.getElementById("cafe-cats");
 	const restCats = document.getElementById("rest-cats");
-	const bfCats = document.getElementById("breakefast-cats");
+	const bfCats = document.getElementById("breakfast-cats");
 	const menuMain = document.querySelector(".menu-main");
 
 	// localStorage helpers
@@ -95,9 +95,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 	if (bfCats) {
 		bfCats.addEventListener("click", async () => {
-			if (getCurrentMenu() === "breakefast") return;
+			if (getCurrentMenu() === "breakfast") return;
 
-			const selectedId = changeMenu("breakefast", window.__categories__);
+			const selectedId = changeMenu("breakfast", window.__categories__);
 			if (selectedId != null) {
 				const prods = await getProductsByCategory(selectedId);
 				renderProducts(prods);
