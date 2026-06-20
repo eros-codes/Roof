@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { auth } from "../middleware/auth.js";
+import { upload } from "../middleware/upload.js";
 import {
 	login,
 	getAllReviews, updateReview,   deleteReview,
 	getAdminProducts, createProduct, updateProduct, deleteProduct,
 	getAdminCategories, createCategory, updateCategory, deleteCategory,
+	uploadImage,
 } from "../controllers/admin.controller.js";
 
 const router = Router();
@@ -19,6 +21,9 @@ router.use(auth);
 router.get("/reviews",     getAllReviews);
 router.patch("/reviews/:id", updateReview);
 router.delete("/reviews/:id", deleteReview);
+
+// upload image
+router.post("/upload", upload.single("image"), uploadImage);
 
 // محصولات
 router.get("/products",      getAdminProducts);

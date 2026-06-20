@@ -71,3 +71,23 @@ export const categories = {
   update: (id, body) => req("PATCH",  `/categories/${id}`, body),
   delete: (id)       => req("DELETE", `/categories/${id}`),
 };
+
+// Upload image (multipart/form-data)
+export async function uploadImage(file) {
+  const fd = new FormData();
+  fd.append('image', file);
+
+  const headers = {};
+  const t = token.get();
+  if (t) headers["Authorization"] = `Bearer ${t}`;
+
+  const res = await fetch(`${BASE}/upload`, {
+    method: 'POST',
+    headers,
+    body: fd,
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `خطای ${res.status}`);
+  return data; // expected { filename }
+}

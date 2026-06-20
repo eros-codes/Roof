@@ -1,4 +1,6 @@
 import * as api from "./api.js";
+const CLIENT_ORIGIN = "http://localhost:3000";
+
 
 // ══════════════════════════════════════════════════════════════════
 //  STATE
@@ -16,10 +18,12 @@ const state = {
 //  TOAST
 // ══════════════════════════════════════════════════════════════════
 const ICONS = {
-  success: `<svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
-  error:   `<svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
-  info:    `<svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+	success: `<svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+	error: `<svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+	info: `<svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+	picture: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`,
 };
+
 
 function toast(msg, type = "info") {
   const el = document.createElement("div");
@@ -419,19 +423,54 @@ function renderProducts() {
     const type = getCatType(p.categoryId);
     const card = document.createElement("div");
     card.className = "product-card";
-    card.innerHTML = `
-      <div class="product-img">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
-          <polyline points="21 15 16 10 5 21"/>
-        </svg>
-      </div>
-      <div class="product-body">
-        <div class="product-cat">${getCatName(p.categoryId)} <span class="badge badge--${type}">${type === "cafe" ? "کافه" : type === "restaurant" ? "رستوران" : "صبحانه"}</span></div>
-        <div class="product-name">${p.name}</div>
-        <div class="product-price">${Number(p.price).toLocaleString("fa-IR")} تومان</div>
-      </div>
-      <div class="product-actions"></div>`;
+    const hasImage = p.image && p.image !== 'placeholder.png';
+    const _img = hasImage
+      ? `<img src="${escapeHtml(CLIENT_ORIGIN)}/public/assets/images/products/${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy">`
+      : ICONS.picture;
+
+    // Build DOM nodes safely instead of raw innerHTML where possible
+    const imgWrap = document.createElement('div');
+    imgWrap.className = 'product-img';
+    if (hasImage) {
+      imgWrap.innerHTML = _img;
+    } else {
+      imgWrap.innerHTML = _img;
+    }
+
+    const body = document.createElement('div');
+    body.className = 'product-body';
+
+    const catDiv = document.createElement('div');
+    catDiv.className = 'product-cat';
+    const catName = document.createElement('span');
+    catName.innerHTML = escapeHtml(getCatName(p.categoryId));
+    const badge = document.createElement('span');
+    badge.className = `badge badge--${escapeHtml(type)}`;
+    badge.innerHTML = escapeHtml(type === 'cafe' ? 'کافه' : type === 'restaurant' ? 'رستوران' : 'صبحانه');
+    catDiv.appendChild(catName);
+    catDiv.appendChild(document.createTextNode(' '));
+    catDiv.appendChild(badge);
+
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'product-name';
+    nameDiv.textContent = p.name;
+
+    const priceDiv = document.createElement('div');
+    priceDiv.className = 'product-price';
+    priceDiv.textContent = `${Number(p.price).toLocaleString('fa-IR')} تومان`;
+
+    body.appendChild(catDiv);
+    body.appendChild(nameDiv);
+    body.appendChild(priceDiv);
+
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'product-actions';
+
+    // Clear card and append safe nodes
+    card.innerHTML = '';
+    card.appendChild(imgWrap);
+    card.appendChild(body);
+    card.appendChild(actionsDiv);
 
     const actions = card.querySelector(".product-actions");
 
@@ -460,32 +499,125 @@ function productFields() {
 }
 
 function addProduct() {
-  openModal({
-    title: "محصول جدید",
-    fields: productFields(),
-    submitText: "افزودن",
-    onSubmit: async (data) => {
-      await api.products.create({ ...data, price: Number(data.price), categoryId: Number(data.categoryId) });
-      toast("محصول اضافه شد", "success");
-      state.products = await api.products.getAll();
-      renderProducts();
-    },
-  });
+	openModal({
+		title: "محصول جدید",
+		fields: productFields(),
+		submitText: "افزودن",
+		onSubmit: async (data) => {
+			await api.products.create({
+				...data,
+				price: Number(data.price),
+				categoryId: Number(data.categoryId),
+			});
+			toast("محصول اضافه شد", "success");
+			state.products = await api.products.getAll();
+			renderProducts();
+		},
+	});
+	injectImageUpload(null);
 }
 
 function editProduct(p) {
-  openModal({
-    title: "ویرایش محصول",
-    fields: productFields(),
-    initialValues: { ...p, categoryId: String(p.categoryId) },
-    submitText: "ذخیره تغییرات",
-    onSubmit: async (data) => {
-      await api.products.update(p.id, { ...data, price: Number(data.price), categoryId: Number(data.categoryId) });
-      toast("محصول ویرایش شد", "success");
-      state.products = await api.products.getAll();
-      renderProducts();
-    },
-  });
+	openModal({
+		title: "ویرایش محصول",
+		fields: productFields(),
+		initialValues: { ...p, categoryId: String(p.categoryId) },
+		submitText: "ذخیره تغییرات",
+		onSubmit: async (data) => {
+			await api.products.update(p.id, {
+				...data,
+				price: Number(data.price),
+				categoryId: Number(data.categoryId),
+			});
+			toast("محصول ویرایش شد", "success");
+			state.products = await api.products.getAll();
+			renderProducts();
+		},
+	});
+	injectImageUpload(p.image);
+}
+
+function injectImageUpload(currentImage) {
+	const imageInput = document.querySelector("#modal-form [name='image']");
+	if (!imageInput) return;
+
+	// input اصلی رو مخفی کن — فقط برای submit نگهش میداریم
+	imageInput.style.display = "none";
+	const wrapper = imageInput.parentElement;
+
+    // پیش‌نمایش
+    const preview = document.createElement("div");
+    preview.className = "img-preview";
+    if (currentImage && currentImage !== 'placeholder.png') {
+      const img = document.createElement("img");
+      img.src = `${CLIENT_ORIGIN}/public/assets/images/products/${currentImage}`;
+      img.alt = "تصویر فعلی";
+      preview.appendChild(img);
+    } else {
+      // show placeholder icon when no image
+      preview.innerHTML = ICONS.picture;
+    }
+
+	// file input مخفی
+	const fileInput = document.createElement("input");
+	fileInput.type = "file";
+	fileInput.accept = "image/jpeg,image/png,image/webp,image/gif";
+	fileInput.style.display = "none";
+
+    // دکمه آپلود
+    const uploadBtn = document.createElement("button");
+    uploadBtn.type = "button";
+    uploadBtn.className = "btn btn--ghost btn--sm";
+
+    // دکمه حذف تصویر
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "btn btn--ghost btn--sm";
+    removeBtn.textContent = "حذف تصویر";
+    removeBtn.onclick = () => {
+      // set to placeholder and update preview/status
+      imageInput.value = "placeholder.png";
+      preview.innerHTML = ICONS.picture;
+      setStatus("تصویر حذف شد", "var(--green)");
+    };
+
+	const status = document.createElement("span");
+	status.className = "upload-status";
+
+	function setStatus(text, color) {
+		status.textContent = text;
+		status.style.color = color;
+	}
+
+	fileInput.onchange = async () => {
+		const file = fileInput.files[0];
+		if (!file) return;
+		uploadBtn.disabled = true;
+		setStatus("در حال آپلود...", "var(--t2)");
+		try {
+			const { filename } = await api.uploadImage(file);
+			imageInput.value = filename;
+			preview.innerHTML = "";
+			const img = document.createElement("img");
+			img.src = `${CLIENT_ORIGIN}/public/assets/images/products/${filename}`;
+			img.alt = "تصویر جدید";
+			preview.appendChild(img);
+			setStatus("✓ آپلود شد", "var(--green)");
+		} catch (err) {
+			setStatus(err.message, "var(--red)");
+		} finally {
+			uploadBtn.disabled = false;
+		}
+	};
+
+  uploadBtn.onclick = () => fileInput.click();
+  uploadBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>انتخاب تصویر</span>`;
+
+  wrapper.appendChild(preview);
+  wrapper.appendChild(fileInput);
+  wrapper.appendChild(uploadBtn);
+  wrapper.appendChild(removeBtn);
+  wrapper.appendChild(status);
 }
 
 async function deleteProduct(id) {
@@ -661,10 +793,20 @@ function logout() {
 // ══════════════════════════════════════════════════════════════════
 //  HELPERS
 // ══════════════════════════════════════════════════════════════════
+function escapeHtml(str) {
+  if (str === undefined || str === null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function mkBtn(text, classes = "", icon = "") {
   const btn = document.createElement("button");
   btn.className = `btn ${classes}`;
-  btn.innerHTML = (icon ? icon : "") + (text ? `<span>${text}</span>` : "");
+  btn.innerHTML = (icon ? icon : "") + (text ? `<span>${escapeHtml(text)}</span>` : "");
   return btn;
 }
 
@@ -704,18 +846,7 @@ function init() {
     const logoutBtn = document.getElementById("logout-btn");
     if (logoutBtn) logoutBtn.addEventListener("click", logout);
 
-    // Restore compact mode preference
-    if (localStorage.getItem("dashboard_compact") === "1") dashEl.classList.add("compact");
-
-    // Compact toggle (collapse sidebar)
-    const compactBtn = document.getElementById("compact-toggle");
-    if (compactBtn) {
-      compactBtn.addEventListener("click", () => {
-        const is = dashEl.classList.toggle("compact");
-        compactBtn.setAttribute("aria-pressed", String(is));
-        localStorage.setItem("dashboard_compact", is ? "1" : "0");
-      });
-    }
+    // compact toggle removed
 
     // Sidebar element and mobile toggle
     const sidebar = document.querySelector(".sidebar");

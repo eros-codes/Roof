@@ -10,10 +10,17 @@ export function createCard({ id, name, description, price, image }) {
 
 	const picDiv = document.createElement("div");
 	picDiv.classList.add("food-pic");
-	const img = document.createElement("img");
-	img.src = new URL(image, IMAGE_BASE).href;
-	img.alt = name;
-	picDiv.appendChild(img);
+	if (image && image !== 'placeholder.png') {
+		const img = document.createElement("img");
+		img.src = new URL(image, IMAGE_BASE).href;
+		img.alt = name;
+		picDiv.appendChild(img);
+	} else {
+		const placeholder = document.createElement('div');
+		placeholder.className = 'food-pic--empty';
+		placeholder.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+		picDiv.appendChild(placeholder);
+	}
 
 	const infoDiv = document.createElement("div");
 	infoDiv.classList.add("food-info");
