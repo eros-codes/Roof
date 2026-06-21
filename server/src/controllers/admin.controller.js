@@ -2,6 +2,23 @@ import prisma from "../lib/prisma.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET, JWT_EXPIRES_IN } from "../config/env.js";
+import fs from "fs/promises";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const PRODUCTS_DIR = path.join(__dirname, "..", "..", "..", "public", "assets", "images", "products");
+
+async function tryUnlink(filename) {
+	if (!filename) return;
+	if (filename === 'placeholder.png') return;
+	try {
+		const p = path.join(PRODUCTS_DIR, filename);
+		await fs.unlink(p).catch(() => {});
+	} catch (err) {
+		// ignore errors — don't block DB updates
+	}
+}
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -9,11 +26,20 @@ export async function login(req, res, next) {
 	try {
 		const { username, password } = req.body;
 
-		if (!username || !password) {
-			return res.status(400).json({ error: "نام کاربری و رمز الزامی است" });
+		// type check
+		if (typeof username !== "string" || typeof password !== "string") {
+			return res.status(400).json({ error: "ورودی نامعتبر است" });
 		}
 
-		const admin = await prisma.admin.findUnique({ where: { username } });
+		// length check
+		if (username.trim().length === 0 || password.length === 0) {
+			return res.status(400).json({ error: "نام کاربری و رمز الزامی است" });
+		}
+		if (username.length > 64 || password.length > 128) {
+			return res.status(400).json({ error: "ورودی نامعتبر است" });
+		}
+
+		const admin = await prisma.admin.findUnique({ where: { username: username.trim() } });
 		if (!admin) {
 			return res.status(401).json({ error: "نام کاربری یا رمز اشتباه است" });
 		}
@@ -116,6 +142,14 @@ export async function updateProduct(req, res, next) {
 		const id = Number(req.params.id);
 		const { name, price, description, image, categoryId } = req.body;
 
+		// fetch existing product to determine if we should remove its file
+		const existing = await prisma.product.findUnique({ where: { id } });
+
+		// If image is provided and different from existing, remove old file when appropriate
+		if (image !== undefined && existing && existing.image && image !== existing.image) {
+			await tryUnlink(existing.image);
+		}
+
 		const product = await prisma.product.update({
 			where: { id },
 			data: {
@@ -135,7 +169,13 @@ export async function updateProduct(req, res, next) {
 
 export async function deleteProduct(req, res, next) {
 	try {
-		await prisma.product.delete({ where: { id: Number(req.params.id) } });
+		const id = Number(req.params.id);
+		const existing = await prisma.product.findUnique({ where: { id } });
+		if (existing && existing.image) {
+			await tryUnlink(existing.image);
+		}
+
+		await prisma.product.delete({ where: { id } });
 		res.json({ success: true });
 	} catch (err) {
 		next(err);
@@ -191,6 +231,18 @@ export async function deleteCategory(req, res, next) {
 	try {
 		await prisma.category.delete({ where: { id: Number(req.params.id) } });
 		res.json({ success: true });
+	} catch (err) {
+		next(err);
+	}
+}
+
+// ─── Upload Image ───────────────────────────────────────────────────────
+export async function uploadImage(req, res, next) {
+	try {
+		if (!req.file) {
+			return res.status(400).json({ error: "فایلی ارسال نشد" });
+		}
+		res.json({ filename: req.file.filename });
 	} catch (err) {
 		next(err);
 	}

@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch src/server.js",
+    "admin:dev": "node admin-proxy.js",
     "start": "node src/server.js",
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.js",
@@ -15,7 +16,10 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.0",
     "express": "^4.21.0",
-    "jsonwebtoken": "^9.0.2"
+    "express-rate-limit": "^6.7.0",
+    "helmet": "^7.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.2.0"
   },
   "devDependencies": {
     "prisma": "^5.22.0"

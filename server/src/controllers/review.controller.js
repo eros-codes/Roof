@@ -16,8 +16,23 @@ export async function postReview(req, res, next) {
 	try {
 		const { name, text } = req.body;
 
-		if (!text?.trim()) {
+		// type check
+		if (typeof text !== "string") {
+			return res.status(400).json({ error: "متن نظر نامعتبر است" });
+		}
+		if (name !== undefined && name !== null && typeof name !== "string") {
+			return res.status(400).json({ error: "نام نامعتبر است" });
+		}
+
+		// length check
+		if (!text.trim()) {
 			return res.status(400).json({ error: "متن نظر الزامی است" });
+		}
+		if (text.length > 500) {
+			return res.status(400).json({ error: "متن نظر حداکثر ۵۰۰ کاراکتر است" });
+		}
+		if (name && name.length > 100) {
+			return res.status(400).json({ error: "نام حداکثر ۱۰۰ کاراکتر است" });
 		}
 
 		const review = await prisma.review.create({

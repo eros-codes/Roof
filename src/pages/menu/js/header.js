@@ -22,7 +22,7 @@ function safeRemoveItem(key) {
 export function toggleCategories(active = "cafe") {
 	const cafeCats = document.getElementById("cafe-cats");
 	const restCats = document.getElementById("rest-cats");
-	const bfCats = document.getElementById("breakefast-cats");
+	const bfCats = document.getElementById("breakfast-cats");
 	if (cafeCats) {
 		if (active === "cafe") cafeCats.classList.add("selected");
 		else cafeCats.classList.remove("selected");
@@ -32,7 +32,7 @@ export function toggleCategories(active = "cafe") {
 		else restCats.classList.remove("selected");
 	}
 	if (bfCats) {
-		if (active === "breakefast") bfCats.classList.add("selected");
+		if (active === "breakfast") bfCats.classList.add("selected");
 		else bfCats.classList.remove("selected");
 	}
 }
