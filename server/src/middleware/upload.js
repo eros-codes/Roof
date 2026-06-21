@@ -13,8 +13,15 @@ const PRODUCTS_DIR = path.join(
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, PRODUCTS_DIR),
   filename: (_req, file, cb) => {
+    const EXT_MAP = {
+      "image/jpeg": ".jpg",
+      "image/png":  ".png",
+      "image/webp": ".webp",
+      "image/gif":  ".gif",
+    };
+    const ext = EXT_MAP[file.mimetype] || ".jpg";
     const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `${unique}${path.extname(file.originalname).toLowerCase()}`);
+    cb(null, `${unique}${ext}`);
   },
 });
 

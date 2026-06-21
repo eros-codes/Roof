@@ -69,6 +69,32 @@ app.use('/api', async (req, res) => {
   }
 });
 
+// Ensure admin UI can retrieve the site's service worker from the backend
+app.get('/service-worker.js', async (req, res) => {
+  try {
+    const upstreamUrl = BACKEND_ORIGIN + '/service-worker.js';
+    const upstreamRes = await fetch(upstreamUrl);
+
+    res.status(upstreamRes.status);
+    upstreamRes.headers.forEach((value, key) => res.setHeader(key, value));
+
+    if (upstreamRes.body && typeof upstreamRes.body.pipe === 'function') {
+      upstreamRes.body.pipe(res);
+    } else {
+      const buf = await upstreamRes.arrayBuffer();
+      res.send(Buffer.from(buf));
+    }
+  } catch (err) {
+    console.error('Failed to proxy service-worker.js:', err);
+    res.status(502).send('Bad Gateway');
+  }
+});
+
+// Respond to Chrome DevTools probe to avoid noisy 404 logs
+app.get('/.well-known/appspecific/com.chrome.devtools.json', (_req, res) => {
+  res.status(204).end();
+});
+
 // Fallback: serve index.html with injected API origin so the admin UI can call the backend
 app.get('*', async (req, res) => {
   try {

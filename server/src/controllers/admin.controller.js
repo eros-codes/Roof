@@ -77,13 +77,26 @@ export async function getAllReviews(req, res, next) {
 export async function updateReview(req, res, next) {
 	try {
 		const id = Number(req.params.id);
+		if (!Number.isInteger(id) || id < 1) {
+			return res.status(400).json({ error: "شناسه نامعتبر است" });
+		}
 		const { visible, reply } = req.body;
+
+		if (visible !== undefined && typeof visible !== "boolean") {
+			return res.status(400).json({ error: "مقدار visible باید boolean باشد" });
+		}
+		if (reply !== undefined && reply !== null && typeof reply !== "string") {
+			return res.status(400).json({ error: "متن پاسخ نامعتبر است" });
+		}
+		if (reply && reply.length > 500) {
+			return res.status(400).json({ error: "پاسخ حداکثر ۵۰۰ کاراکتر است" });
+		}
 
 		const review = await prisma.review.update({
 			where: { id },
 			data: {
 				...(visible !== undefined && { visible }),
-				...(reply  !== undefined && { reply  }),
+				...(reply !== undefined && { reply }),
 			},
 		});
 
@@ -95,7 +108,11 @@ export async function updateReview(req, res, next) {
 
 export async function deleteReview(req, res, next) {
 	try {
-		await prisma.review.delete({ where: { id: Number(req.params.id) } });
+		const id = Number(req.params.id);
+		if (!Number.isInteger(id) || id < 1) {
+			return res.status(400).json({ error: "شناسه نامعتبر است" });
+		}
+		await prisma.review.delete({ where: { id } });
 		res.json({ success: true });
 	} catch (err) {
 		next(err);
@@ -117,13 +134,25 @@ export async function createProduct(req, res, next) {
 	try {
 		const { name, price, description, image, categoryId } = req.body;
 
-		if (!name || price == null || !categoryId) {
-			return res.status(400).json({ error: "نام، قیمت و دسته‌بندی الزامی است" });
+		if (typeof name !== "string" || !name.trim()) {
+			return res.status(400).json({ error: "نام محصول الزامی است" });
+		}
+		if (Number.isNaN(Number(price)) || Number(price) < 0) {
+			return res.status(400).json({ error: "قیمت نامعتبر است" });
+		}
+		if (categoryId === undefined || Number.isNaN(Number(categoryId)) || Number(categoryId) < 1) {
+			return res.status(400).json({ error: "شناسه دسته‌بندی نامعتبر است" });
+		}
+		if (description !== undefined && description !== null && typeof description !== "string") {
+			return res.status(400).json({ error: "توضیحات نامعتبر است" });
+		}
+		if (image !== undefined && typeof image !== "string") {
+			return res.status(400).json({ error: "نام فایل تصویر نامعتبر است" });
 		}
 
 		const product = await prisma.product.create({
 			data: {
-				name,
+				name: name.trim(),
 				price:      Number(price),
 				description: description || "",
 				image:       image || "placeholder.png",
@@ -140,7 +169,26 @@ export async function createProduct(req, res, next) {
 export async function updateProduct(req, res, next) {
 	try {
 		const id = Number(req.params.id);
+		if (!Number.isInteger(id) || id < 1) {
+			return res.status(400).json({ error: "شناسه نامعتبر است" });
+		}
 		const { name, price, description, image, categoryId } = req.body;
+
+		if (name !== undefined && typeof name !== "string") {
+			return res.status(400).json({ error: "نام محصول نامعتبر است" });
+		}
+		if (price !== undefined && Number.isNaN(Number(price))) {
+			return res.status(400).json({ error: "قیمت نامعتبر است" });
+		}
+		if (description !== undefined && description !== null && typeof description !== "string") {
+			return res.status(400).json({ error: "توضیحات نامعتبر است" });
+		}
+		if (image !== undefined && typeof image !== "string") {
+			return res.status(400).json({ error: "نام فایل تصویر نامعتبر است" });
+		}
+		if (categoryId !== undefined && (!Number.isInteger(Number(categoryId)) || Number(categoryId) < 1)) {
+			return res.status(400).json({ error: "شناسه دسته‌بندی نامعتبر است" });
+		}
 
 		// fetch existing product to determine if we should remove its file
 		const existing = await prisma.product.findUnique({ where: { id } });
@@ -170,6 +218,9 @@ export async function updateProduct(req, res, next) {
 export async function deleteProduct(req, res, next) {
 	try {
 		const id = Number(req.params.id);
+		if (!Number.isInteger(id) || id < 1) {
+			return res.status(400).json({ error: "شناسه نامعتبر است" });
+		}
 		const existing = await prisma.product.findUnique({ where: { id } });
 		if (existing && existing.image) {
 			await tryUnlink(existing.image);
@@ -211,7 +262,22 @@ export async function createCategory(req, res, next) {
 export async function updateCategory(req, res, next) {
 	try {
 		const id = Number(req.params.id);
+		if (!Number.isInteger(id) || id < 1) {
+			return res.status(400).json({ error: "شناسه نامعتبر است" });
+		}
 		const { name, type } = req.body;
+
+		if (name !== undefined && typeof name !== "string") {
+			return res.status(400).json({ error: "نام دسته‌بندی نامعتبر است" });
+		}
+		if (type !== undefined && typeof type !== "string") {
+			return res.status(400).json({ error: "نوع دسته‌بندی نامعتبر است" });
+		}
+
+		const VALID_TYPES = ["cafe", "restaurant", "breakfast"];
+		if (type !== undefined && !VALID_TYPES.includes(type)) {
+			return res.status(400).json({ error: "نوع دسته‌بندی نامعتبر است" });
+		}
 
 		const category = await prisma.category.update({
 			where: { id },
@@ -229,7 +295,11 @@ export async function updateCategory(req, res, next) {
 
 export async function deleteCategory(req, res, next) {
 	try {
-		await prisma.category.delete({ where: { id: Number(req.params.id) } });
+		const id = Number(req.params.id);
+		if (!Number.isInteger(id) || id < 1) {
+			return res.status(400).json({ error: "شناسه نامعتبر است" });
+		}
+		await prisma.category.delete({ where: { id } });
 		res.json({ success: true });
 	} catch (err) {
 		next(err);
