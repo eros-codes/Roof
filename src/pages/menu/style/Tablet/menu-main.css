@@ -60,7 +60,7 @@ body > div {
 	color: var(--t3);
 
 }
-.food-pic--empty svg { width: 32px; height: 32px; }
+.food-pic--empty svg { width: 3rem; height: 3rem; }
 
 .food-info {
 	background: var(--card-color);

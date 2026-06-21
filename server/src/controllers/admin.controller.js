@@ -26,11 +26,20 @@ export async function login(req, res, next) {
 	try {
 		const { username, password } = req.body;
 
-		if (!username || !password) {
-			return res.status(400).json({ error: "نام کاربری و رمز الزامی است" });
+		// type check
+		if (typeof username !== "string" || typeof password !== "string") {
+			return res.status(400).json({ error: "ورودی نامعتبر است" });
 		}
 
-		const admin = await prisma.admin.findUnique({ where: { username } });
+		// length check
+		if (username.trim().length === 0 || password.length === 0) {
+			return res.status(400).json({ error: "نام کاربری و رمز الزامی است" });
+		}
+		if (username.length > 64 || password.length > 128) {
+			return res.status(400).json({ error: "ورودی نامعتبر است" });
+		}
+
+		const admin = await prisma.admin.findUnique({ where: { username: username.trim() } });
 		if (!admin) {
 			return res.status(401).json({ error: "نام کاربری یا رمز اشتباه است" });
 		}

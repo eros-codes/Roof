@@ -1,6 +1,43 @@
 import * as api from "./api.js";
 const CLIENT_ORIGIN = "http://localhost:3000";
 
+// Theme — toggle icon updates with the theme (sun for light, moon for dark)
+const THEME_KEY = "roof:admin:theme";
+const ICON_SUN = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>`;
+const ICON_MOON = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+
+function setToggleIcon(btn, theme) {
+  if (!btn) return;
+  btn.innerHTML = theme === "dark" ? ICON_MOON : ICON_SUN;
+}
+
+function applyTheme(theme) {
+  if (theme === "dark") document.documentElement.classList.add("theme-dark");
+  else document.documentElement.classList.remove("theme-dark");
+  const btn = document.getElementById("theme-toggle");
+  if (btn) {
+    btn.setAttribute("aria-pressed", theme === "dark");
+    setToggleIcon(btn, theme);
+  }
+}
+
+function initTheme() {
+  try {
+    const stored = localStorage.getItem(THEME_KEY);
+    const theme = stored === "dark" ? "dark" : "light";
+    applyTheme(theme);
+  } catch (e) { /* ignore */ }
+  const btn = document.getElementById("theme-toggle");
+  if (btn) {
+    btn.addEventListener("click", () => {
+      const isDark = document.documentElement.classList.contains("theme-dark");
+      const next = isDark ? "light" : "dark";
+      applyTheme(next);
+      try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+    });
+  }
+}
+
 
 // ══════════════════════════════════════════════════════════════════
 //  STATE
@@ -187,6 +224,9 @@ async function navigate(section) {
   await loadSection(section);
 }
 
+// initialize theme when script loads
+initTheme();
+
 async function loadSection(section) {
   const el = document.getElementById(`section-${section}`);
   el.innerHTML = `<div class="empty"><div class="skeleton" style="width:120px;height:16px;margin-bottom:.5rem"></div><div class="skeleton" style="width:80px;height:12px"></div></div>`;
@@ -222,9 +262,7 @@ function renderReviews() {
   const pending  = all.filter(r => !r.visible);
   const approved = all.filter(r =>  r.visible);
 
-  // Update pending badge in sidebar
-  const badge = document.getElementById("nav-badge-reviews");
-  badge.textContent = pending.length || "";
+  // pending count handled in reviews header
 
   // Filter
   let list = state.reviewFilter === "pending"  ? pending

@@ -8,6 +8,7 @@ Run the development server from the `server` directory:
 ```bash
 cd server
 npm install
+npm run db:push
 npm run dev
 ```
 
@@ -15,7 +16,7 @@ npm run dev
 Serve the static site from the `public` directory:
 
 ```bash
-npx http-server public -p 3000
+npx http-server . -p 3000
 ```
 
 Note: Use `localhost` (not `127.0.0.1`) for local development.

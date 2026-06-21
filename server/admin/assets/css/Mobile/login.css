@@ -78,7 +78,7 @@
 	background: var(--red-bg);
 	border: 1px solid rgba(240, 68, 68, 0.2);
 	color: var(--red);
-	border-radius: var(--radius-sm);
+	border-radius: 0.5rem;
 	padding: 0.6rem 0.9rem;
 	font-size: 0.8rem;
 	animation: fadeUp 0.2s ease;

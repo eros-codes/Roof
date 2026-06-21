@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { auth } from "../middleware/auth.js";
 import { upload } from "../middleware/upload.js";
+import { loginLimiter } from "../middleware/rateLimiter.js";
 import {
 	login,
 	getAllReviews, updateReview,   deleteReview,
@@ -12,7 +13,7 @@ import {
 const router = Router();
 
 // بدون نیاز به توکن
-router.post("/login", login);
+router.post("/login", loginLimiter, login);
 
 // همه‌ی مسیرهای زیر نیاز به JWT دارن
 router.use(auth);
