@@ -105,7 +105,16 @@ function logout() { api.token.remove(); window.location.href = 'index.html'; }
 
 function init() {
 	const loginForm = document.getElementById('login-form');
-	if (loginForm) { loginForm.addEventListener('submit', handleLogin); if (api.token.exists()) window.location.href = 'dashboard.html'; }
+	if (loginForm) {
+		loginForm.addEventListener('submit', handleLogin);
+		// If we were redirected here because the session expired, show a message.
+		if (localStorage.getItem('roof_session_expired')) {
+			const errEl = document.getElementById('login-error');
+			if (errEl) { errEl.textContent = 'نشست شما منقضی شد؛ لطفاً دوباره وارد شوید.'; errEl.hidden = false; }
+			try { localStorage.removeItem('roof_session_expired'); } catch (e) {}
+		}
+		if (api.token.exists()) window.location.href = 'dashboard.html';
+	}
 	const dashEl = document.getElementById('dashboard-view');
 	if (dashEl) {
 		if (!api.token.exists()) { window.location.href = 'index.html'; return; }

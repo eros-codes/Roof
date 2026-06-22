@@ -28,8 +28,11 @@ async function req(method, path, body) {
   const data = await res.json().catch(() => ({}));
 
   if (res.status === 401) {
+    // Session expired or invalid token: remove token and redirect to login.
     token.remove();
-    window.location.reload();
+    try { localStorage.setItem('roof_session_expired', '1'); } catch (e) {}
+    // Redirect to the admin login page (relative path).
+    window.location.href = 'index.html';
     return;
   }
 

@@ -5,6 +5,7 @@ export const state = {
   categories: [],
   reviewFilter: 'all',
   productFilter: 'all',
+  categoryFilter: 'all',
 };
 
 export function getCatName(id) {

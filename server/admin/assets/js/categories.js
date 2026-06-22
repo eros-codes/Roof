@@ -23,11 +23,26 @@ export function renderCategories() {
   el.innerHTML = '';
   const header = document.createElement('div');
   header.className = 'section-header';
-  header.innerHTML = `<div><h1 class="section-title">دسته‌بندی‌ها</h1><p class="section-sub">${state.categories.length} دسته</p></div>`;
+  // show filtered count in header
+  const filteredCount = state.categoryFilter === 'all' ? state.categories.length : state.categories.filter(c => c.type === state.categoryFilter).length;
+  header.innerHTML = `<div><h1 class="section-title">دسته‌بندی‌ها</h1><p class="section-sub">${filteredCount} دسته</p></div>`;
   const addBtn = mkBtn('دسته جدید', 'btn--accent'); addBtn.onclick = () => addCategory(); header.appendChild(addBtn); el.appendChild(header);
+  const tabs = document.createElement('div');
+  tabs.className = 'tabs';
+  tabs.style.marginBottom = '1rem';
+  [['all', 'همه'], ['cafe', 'کافه'], ['restaurant', 'رستوران'], ['breakfast', 'صبحانه']].forEach(([val, label]) => {
+    const btn = document.createElement('button');
+    btn.className = `tab${state.categoryFilter === val ? ' active' : ''}`;
+    btn.textContent = label;
+    btn.onclick = () => { state.categoryFilter = val; renderCategories(); };
+    tabs.appendChild(btn);
+  });
+  el.appendChild(tabs);
+
   if (state.categories.length === 0) { el.appendChild(emptyState('دسته‌بندی پیدا نشد', 'هنوز دسته‌ای ایجاد نشده')); return; }
   const list = document.createElement('div'); list.className = 'categories-list';
-  state.categories.forEach((c) => {
+  const listItems = state.categoryFilter === 'all' ? state.categories : state.categories.filter(c => c.type === state.categoryFilter);
+  listItems.forEach((c) => {
     const count = state.products.filter(p => p.categoryId === c.id).length;
     const row = document.createElement('div'); row.className = 'category-row';
     row.innerHTML = `\n      <div class="category-info">\n        <span class="badge badge--${c.type}">${c.type}</span>\n        <span class="category-name">${c.name}</span>\n        <span style="color:var(--quaternary-text-color);font-size:.75rem">${count} محصول</span>\n      </div>\n      <div class="category-actions"></div>`;

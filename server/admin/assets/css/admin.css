@@ -1,3 +1,5 @@
+@import url('/assets/style/global.css');
+
 @import url("./Mobile/mobile.css") screen and (max-width: 767px);
 @import url("./Tablet/tablet.css") screen and (min-width: 768px) and (max-width: 1023px);
 @import url("./Laptop/laptop.css") screen and (min-width: 1024px);

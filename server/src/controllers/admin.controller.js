@@ -246,14 +246,36 @@ export async function getAdminCategories(req, res, next) {
 
 export async function createCategory(req, res, next) {
 	try {
-		const { name, type } = req.body;
+		let { name, type } = req.body;
 
 		if (!name || !type) {
 			return res.status(400).json({ error: "نام و نوع دسته‌بندی الزامی است" });
 		}
 
-		const category = await prisma.category.create({ data: { name, type } });
-		res.status(201).json(category);
+		name = String(name).trim();
+		type = String(type).trim();
+
+		const VALID_TYPES = ["cafe", "restaurant", "breakfast"];
+		if (!VALID_TYPES.includes(type)) {
+			return res.status(400).json({ error: "نوع دسته‌بندی نامعتبر است" });
+		}
+
+		// Try create; if a P2002 unique constraint on `id` happens (sequence out-of-sync),
+		// attempt to re-sync the Postgres sequence and retry once.
+		try {
+			const category = await prisma.category.create({ data: { name, type } });
+			res.status(201).json(category);
+			return;
+		} catch (createErr) {
+			if (createErr && createErr.code === 'P2002' && createErr.meta && Array.isArray(createErr.meta.target) && createErr.meta.target.includes('id')) {
+				// Re-sync serial sequence to max(id) and retry
+				await prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('categories','id'), (SELECT COALESCE(MAX(id), 1) FROM categories))`;
+				const category = await prisma.category.create({ data: { name, type } });
+				res.status(201).json(category);
+				return;
+			}
+			throw createErr;
+		}
 	} catch (err) {
 		next(err);
 	}
