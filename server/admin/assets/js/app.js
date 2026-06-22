@@ -1,55 +1,12 @@
 import * as api from "./api.js";
-const CLIENT_ORIGIN = "http://localhost:3000";
+export { state } from './state.js';
+export { initTheme, toast, openModal, closeModal, ICONS } from './ui.js';
+export { mkBtn, emptyState } from './helpers.js';
+export { loadReviews, renderReviews, replyToReview } from './reviews.js';
+export { loadProducts, renderProducts, addProduct, editProduct, injectImageUpload, deleteProduct } from './products.js';
+export { loadCategories, renderCategories, addCategory, editCategory, deleteCategory, catFields } from './categories.js';
 
-// Theme — toggle icon updates with the theme (sun for light, moon for dark)
-const THEME_KEY = "roof:admin:theme";
-const ICON_SUN = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>`;
-const ICON_MOON = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
-
-function setToggleIcon(btn, theme) {
-  if (!btn) return;
-  btn.innerHTML = theme === "dark" ? ICON_MOON : ICON_SUN;
-}
-
-function applyTheme(theme) {
-  if (theme === "dark") document.documentElement.classList.add("theme-dark");
-  else document.documentElement.classList.remove("theme-dark");
-  const btn = document.getElementById("theme-toggle");
-  if (btn) {
-    btn.setAttribute("aria-pressed", theme === "dark");
-    setToggleIcon(btn, theme);
-  }
-}
-
-function initTheme() {
-  try {
-    const stored = localStorage.getItem(THEME_KEY);
-    const theme = stored === "dark" ? "dark" : "light";
-    applyTheme(theme);
-  } catch (e) { /* ignore */ }
-  const btn = document.getElementById("theme-toggle");
-  if (btn) {
-    btn.addEventListener("click", () => {
-      const isDark = document.documentElement.classList.contains("theme-dark");
-      const next = isDark ? "light" : "dark";
-      applyTheme(next);
-      try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
-    });
-  }
-}
-
-
-// ══════════════════════════════════════════════════════════════════
-//  STATE
-// ══════════════════════════════════════════════════════════════════
-const state = {
-  section:    "reviews",
-  reviews:    [],
-  products:   [],
-  categories: [],
-  reviewFilter: "all",   // "all" | "pending" | "approved"
-  productFilter: "all",  // "all" | category id
-};
+const CLIENT_ORIGIN = ""; // use proxied/relative asset paths
 
 // ══════════════════════════════════════════════════════════════════
 //  TOAST
@@ -224,7 +181,7 @@ async function navigate(section) {
   await loadSection(section);
 }
 
-// initialize theme when script loads
+// initialize theme when script loads (ui module)
 initTheme();
 
 async function loadSection(section) {
@@ -463,7 +420,7 @@ function renderProducts() {
     card.className = "product-card";
     const hasImage = p.image && p.image !== 'placeholder.png';
     const _img = hasImage
-      ? `<img src="${escapeHtml(CLIENT_ORIGIN)}/public/assets/images/products/${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy">`
+      ? `<img src="/assets/images/products/${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy">`
       : ICONS.picture;
 
     // Build DOM nodes safely instead of raw innerHTML where possible
@@ -588,7 +545,7 @@ function injectImageUpload(currentImage) {
     preview.className = "img-preview";
     if (currentImage && currentImage !== 'placeholder.png') {
       const img = document.createElement("img");
-      img.src = `${CLIENT_ORIGIN}/public/assets/images/products/${currentImage}`;
+      img.src = '/assets/images/products/' + currentImage;
       img.alt = "تصویر فعلی";
       preview.appendChild(img);
     } else {
@@ -631,15 +588,15 @@ function injectImageUpload(currentImage) {
 		const file = fileInput.files[0];
 		if (!file) return;
 		uploadBtn.disabled = true;
-		setStatus("در حال آپلود...", "var(--t2)");
+		setStatus("در حال آپلود...", "var(--tertiary-text-color)");
 		try {
 			const { filename } = await api.uploadImage(file);
 			imageInput.value = filename;
 			preview.innerHTML = "";
-			const img = document.createElement("img");
-			img.src = `${CLIENT_ORIGIN}/public/assets/images/products/${filename}`;
-			img.alt = "تصویر جدید";
-			preview.appendChild(img);
+            const img = document.createElement("img");
+            img.src = '/assets/images/products/' + filename;
+            img.alt = "تصویر جدید";
+            preview.appendChild(img);
 			setStatus("✓ آپلود شد", "var(--green)");
 		} catch (err) {
 			setStatus(err.message, "var(--red)");
@@ -704,7 +661,7 @@ function renderCategories() {
       <div class="category-info">
         <span class="badge badge--${c.type}">${TYPE_LABELS[c.type] || c.type}</span>
         <span class="category-name">${c.name}</span>
-        <span style="color:var(--t3);font-size:.75rem">${count} محصول</span>
+        <span style="color:var(--quaternary-text-color);font-size:.75rem">${count} محصول</span>
       </div>
       <div class="category-actions"></div>`;
 

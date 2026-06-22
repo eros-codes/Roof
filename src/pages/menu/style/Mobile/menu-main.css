@@ -56,7 +56,7 @@ body > div {
 	align-items: center;
 	justify-content: center;
 	background: var(--s2);
-	color: var(--t3);
+	color: var(--quaternary-text-color);
 
 }
 .food-pic--empty svg { width: 3rem; height: 3rem; }

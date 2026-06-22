@@ -97,6 +97,6 @@ public/uploads/
 
 seed.js
 
-# Ignore product images but keep the folder with a tracked .gitkeep
 /public/assets/images/products/**
 !/public/assets/images/products/.gitkeep
+.DS_Store

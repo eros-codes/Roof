@@ -1,4 +1,7 @@
-@import url(../global.css);
+@import url('/assets/style/global.css');
 
 @import url(dashboard.css);
+@import url(reviews.css);
+@import url(products.css);
+@import url(categories.css);
 @import url(login.css);

@@ -20,6 +20,48 @@ const app = express();
 // Serve static assets (CSS/JS/images) from server/admin
 app.use(express.static(ADMIN_DIR, { index: false }));
 
+// Proxy missing /assets/* requests to the backend public folder
+app.get('/assets/*', async (req, res) => {
+  try {
+    const upstreamUrl = BACKEND_ORIGIN + req.originalUrl;
+    const upstreamRes = await fetch(upstreamUrl);
+
+    res.status(upstreamRes.status);
+    upstreamRes.headers.forEach((value, key) => res.setHeader(key, value));
+
+    if (upstreamRes.body && typeof upstreamRes.body.pipe === 'function') {
+      upstreamRes.body.pipe(res);
+    } else {
+      const buf = await upstreamRes.arrayBuffer();
+      res.send(Buffer.from(buf));
+    }
+  } catch (err) {
+    console.error('Asset proxy error:', err);
+    res.status(502).send('Bad Gateway');
+  }
+});
+
+// Proxy /fonts/* requests to backend public fonts
+app.get('/fonts/*', async (req, res) => {
+  try {
+    const upstreamUrl = BACKEND_ORIGIN + req.originalUrl;
+    const upstreamRes = await fetch(upstreamUrl);
+
+    res.status(upstreamRes.status);
+    upstreamRes.headers.forEach((value, key) => res.setHeader(key, value));
+
+    if (upstreamRes.body && typeof upstreamRes.body.pipe === 'function') {
+      upstreamRes.body.pipe(res);
+    } else {
+      const buf = await upstreamRes.arrayBuffer();
+      res.send(Buffer.from(buf));
+    }
+  } catch (err) {
+    console.error('Font proxy error:', err);
+    res.status(502).send('Bad Gateway');
+  }
+});
+
 // Proxy /api/* requests to the backend API (preserve method, headers, body)
 app.use('/api', async (req, res) => {
   try {
