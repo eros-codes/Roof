@@ -1,0 +1,62 @@
+.s-popular {
+	background: linear-gradient(to bottom, var(--arctic), var(--slopes));
+	padding: 4.5rem 1.25rem;
+}
+
+.s-popular__header {
+	text-align: center;
+	margin-bottom: 2.25rem;
+}
+
+.s-popular__header .section-title {
+	font-size: 1.35rem;
+	color: var(--midnight);
+	margin-bottom: 0.65rem;
+}
+
+.s-popular__header .section-sub {
+	font-size: 0.8rem;
+	color: var(--midnight);
+	opacity: 0.5;
+	line-height: 1.8;
+}
+
+.s-popular__grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 1rem;
+}
+
+.s-pop {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.6rem;
+}
+
+.s-pop__img {
+	width: 100%;
+	aspect-ratio: 1;
+	border-radius: 4px;
+	overflow: hidden;
+	border: 1px solid rgba(9, 15, 21, 0.07);
+	transition: box-shadow 0.3s ease;
+}
+
+.s-pop:active .s-pop__img {
+	box-shadow: 0 6px 18px rgba(9, 15, 21, 0.12);
+}
+
+.s-pop__img img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.s-pop__name {
+	font-family: "Baloo Bhaijaan 2", sans-serif;
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: var(--midnight);
+	text-align: center;
+}

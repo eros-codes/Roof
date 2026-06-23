@@ -1,0 +1,62 @@
+.s-cakes {
+	background: linear-gradient(to bottom, var(--slopes), var(--arctic));
+	padding: 4.5rem 0;
+}
+
+.s-cakes__header {
+	text-align: center;
+	padding: 0 1.25rem;
+	margin-bottom: 2.25rem;
+}
+
+.s-cakes__header .section-title {
+	font-size: 1.35rem;
+	color: var(--midnight);
+	margin-bottom: 0.65rem;
+}
+
+.s-cakes__header .section-sub {
+	font-size: 0.8rem;
+	color: var(--midnight);
+	opacity: 0.5;
+	line-height: 1.8;
+}
+
+.s-cakes__track {
+	display: flex;
+	gap: 1rem;
+	padding: 0.25rem 1.25rem 1rem;
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+	-webkit-overflow-scrolling: touch;
+}
+
+.s-cake {
+	flex: 0 0 calc(75vw - 1.25rem);
+	max-width: 260px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.7rem;
+	scroll-snap-align: start;
+}
+
+.s-cake__img {
+	width: 100%;
+	aspect-ratio: 3 / 4;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.s-cake__img img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.s-cake__name {
+	font-family: "Baloo Bhaijaan 2", sans-serif;
+	font-size: 0.78rem;
+	font-weight: 600;
+	color: var(--midnight);
+}

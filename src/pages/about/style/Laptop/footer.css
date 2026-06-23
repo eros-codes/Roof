@@ -1,66 +1,73 @@
-footer {
-    width: 100%;
-    height: 150px;
-    background-color: #1f1f1f30;
-    color: #403939;
-    padding: 15px 20px 0px 10px;
-    display: flex;
-    flex-direction: column;
+/* ─── Footer ─────────────────────────────────────────── */
+/* slopes → midnight: dramatic dark close */
+.s-footer {
+	background: linear-gradient(to bottom, var(--slopes), var(--midnight));
+	padding: 5rem 3.5rem 2.5rem;
 }
 
- footer div.footer-container {
-    width: 100%;
-    height: 90%;
-    display: flex;
-    flex-direction: column;
-    justify-content: start;
-    gap: 50px;
-    flex-wrap: wrap;
+.s-footer__inner {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 3rem;
+	max-width: 940px;
+	margin: 0 auto;
+	padding-bottom: 3rem;
+	border-bottom: 1px solid rgba(211, 209, 206, 0.1);
 }
 
- footer div.footer-container div.footer-column {
-    width: 26%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: start;
-
+/* ─── Columns ────────────────────────────────────────── */
+.s-footer__col {
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
 }
 
-/* .footer-column h3 {
-    font-size: 17px;
-    margin-bottom: 15px;
-} */
+.s-footer__col--brand { gap: 1rem; }
 
-.footer-column p {
-    line-height: 1.8;
-    margin-bottom: 8px;
-    font-size: 11px;
+.s-footer__brand {
+	font-family: "Lora", serif;
+	font-weight: 700;
+	font-size: 1.6rem;
+	color: var(--arctic);
+	letter-spacing: 0.04em;
 }
 
-.footer-column a {
-    display: block;
-    text-decoration: none;
-    color: #403939;
-    margin-bottom: 10px;
-    transition: 0.3s;
-    font-size: 11px;
+.s-footer__col p {
+	font-family: "Baloo Bhaijaan 2", sans-serif;
+	font-size: 0.78rem;
+	color: var(--arctic);
+	opacity: 0.45;
+	line-height: 1.85;
 }
 
-.footer-column a:hover {
-    color: #ffffff;
+/* ─── Social links ───────────────────────────────────── */
+.s-footer__link {
+	font-family: "Baloo Bhaijaan 2", sans-serif;
+	font-size: 0.78rem;
+	color: var(--arctic);
+	opacity: 0.45;
+	transition: opacity 0.2s ease, transform 0.2s ease;
+	display: inline-block;
 }
 
-.footer-bottom {
-    width: 10%;
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    text-align: center;
+/* RTL: hover moves link to the left (reading direction) */
+.s-footer__link:hover {
+	opacity: 1;
+	transform: translateX(-5px);
 }
 
-.footer-bottom p {
-    color: #9a9a9a;
-    font-size: 14px;
+/* ─── Bottom bar ─────────────────────────────────────── */
+.s-footer__bottom {
+	max-width: 940px;
+	margin: 2.25rem auto 0;
+	text-align: center;
+}
+
+.s-footer__bottom p {
+	font-family: "Baloo Bhaijaan 2", sans-serif;
+	font-size: 0.7rem;
+	color: var(--arctic);
+	opacity: 0.22;
+	letter-spacing: 0.04em;
 }
