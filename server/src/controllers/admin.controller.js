@@ -50,7 +50,7 @@ export async function login(req, res, next) {
 		}
 
 		const token = jwt.sign(
-			{ id: admin.id, username: admin.username },
+			{ id: admin.id, username: admin.username, role: admin.role },
 			JWT_SECRET,
 			{ expiresIn: JWT_EXPIRES_IN }
 		);
@@ -59,6 +59,91 @@ export async function login(req, res, next) {
 	} catch (err) {
 		next(err);
 	}
+}
+
+// ─── Admins (management) ───────────────────────────────────────────────────
+
+async function ensureRequesterIsMain(req) {
+	const requesterId = req.admin && req.admin.id;
+	if (!requesterId) return null;
+	const requester = await prisma.admin.findUnique({ where: { id: requesterId } });
+	return requester && requester.role === 'MAIN';
+}
+
+export async function getAdmins(req, res, next) {
+	try {
+		const admins = await prisma.admin.findMany({ select: { id: true, username: true, firstName: true, lastName: true, createdAt: true, role: true }, orderBy: { id: 'asc' } });
+		res.json(admins);
+	} catch (err) {
+		next(err);
+	}
+}
+
+export async function createAdmin(req, res, next) {
+	try {
+		const isMain = await ensureRequesterIsMain(req);
+		if (!isMain) return res.status(403).json({ error: 'دسترسی کافی نیست' });
+
+		let { username, password, firstName, lastName, role } = req.body || {};
+		if (typeof username !== 'string' || !username.trim()) return res.status(400).json({ error: 'نام کاربری الزامی است' });
+		if (typeof password !== 'string' || password.length < 4) return res.status(400).json({ error: 'رمز عبور نامعتبر است' });
+		firstName = typeof firstName === 'string' && firstName.trim() ? firstName.trim() : 'admin';
+		lastName = typeof lastName === 'string' && lastName.trim() ? lastName.trim() : 'admin';
+		const VALID = ['MAIN', 'SECONDARY'];
+		if (!VALID.includes(role)) role = 'SECONDARY';
+
+		const existing = await prisma.admin.findUnique({ where: { username: username.trim() } });
+		if (existing) return res.status(409).json({ error: 'نام کاربری قبلاً ثبت شده' });
+
+		const hashed = await bcrypt.hash(password, 10);
+		const created = await prisma.admin.create({ data: { username: username.trim(), password: hashed, firstName, lastName, role } });
+		res.status(201).json({ id: created.id, username: created.username, firstName: created.firstName, lastName: created.lastName, createdAt: created.createdAt, role: created.role });
+	} catch (err) { next(err); }
+}
+
+export async function updateAdmin(req, res, next) {
+	try {
+		const isMain = await ensureRequesterIsMain(req);
+		if (!isMain) return res.status(403).json({ error: 'دسترسی کافی نیست' });
+		const id = Number(req.params.id);
+		if (!Number.isInteger(id) || id < 1) return res.status(400).json({ error: 'شناسه نامعتبر است' });
+
+		const { username, password, firstName, lastName, role } = req.body || {};
+		const data = {};
+		if (username !== undefined) data.username = String(username).trim();
+		if (firstName !== undefined) data.firstName = String(firstName).trim() || 'admin';
+		if (lastName !== undefined) data.lastName = String(lastName).trim() || 'admin';
+		if (role !== undefined) {
+			const VALID = ['MAIN', 'SECONDARY']; if (!VALID.includes(role)) return res.status(400).json({ error: 'نقش نامعتبر است' }); data.role = role;
+		}
+		if (password !== undefined) {
+			if (typeof password !== 'string' || password.length < 4) return res.status(400).json({ error: 'رمز عبور نامعتبر است' });
+			data.password = await bcrypt.hash(password, 10);
+		}
+
+		const updated = await prisma.admin.update({ where: { id }, data });
+		res.json({ id: updated.id, username: updated.username, firstName: updated.firstName, lastName: updated.lastName, createdAt: updated.createdAt, role: updated.role });
+	} catch (err) { next(err); }
+}
+
+export async function deleteAdmin(req, res, next) {
+	try {
+		const isMain = await ensureRequesterIsMain(req);
+		if (!isMain) return res.status(403).json({ error: 'دسترسی کافی نیست' });
+		const id = Number(req.params.id);
+		if (!Number.isInteger(id) || id < 1) return res.status(400).json({ error: 'شناسه نامعتبر است' });
+		// ensure we don't delete the last MAIN admin
+		const target = await prisma.admin.findUnique({ where: { id } });
+		if (!target) return res.status(404).json({ error: 'ادمین یافت نشد' });
+		if (target.role === 'MAIN') {
+			const mainCount = await prisma.admin.count({ where: { role: 'MAIN' } });
+			if (mainCount <= 1) {
+				return res.status(400).json({ error: 'حداقل باید یک ادمین با نقش MAIN وجود داشته باشد. حذف انجام نشد.' });
+			}
+		}
+		await prisma.admin.delete({ where: { id } });
+		res.json({ success: true });
+	} catch (err) { next(err); }
 }
 
 // ─── Reviews ──────────────────────────────────────────────────────────────────

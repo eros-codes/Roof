@@ -49,6 +49,7 @@
 	justify-content: end;
 	gap: 1rem;
 	padding: 0 1rem;
+	position: relative;
 }
 .menu-options button {
 	padding: 0.5rem 0;
@@ -95,7 +96,6 @@
 }
 .menu-options button.selected {
 	color: white;
-	border-bottom: 2px solid var(--header-options-hover);
 }
 .menu-categories li.selected{
 	background-color: var(--header-options-hover);
@@ -226,4 +226,28 @@
 }
 .menu-footer-links a:hover {
 	background: rgba(0,0,0,0.03);
+}
+
+/* keyboard focus visibility */
+.menu-categories a:focus-visible,
+.menu-options button:focus-visible,
+.mobile-hamburger:focus-visible {
+	outline: 3px solid var(--blue);
+	outline-offset: 2px;
+	border-radius: 6px;
+}
+
+/* type indicator for menu options */
+.menu-options .type-indicator {
+	position: absolute;
+	bottom: 6px;
+	left: 0;
+	height: 3px;
+	width: 0;
+	background: var(--header-options-hover);
+	border-radius: 3px;
+	transform: translateX(0);
+	transition: transform .32s cubic-bezier(.2,.9,.2,1), width .32s cubic-bezier(.2,.9,.2,1), opacity .2s ease;
+	opacity: 0;
+	pointer-events: none;
 }

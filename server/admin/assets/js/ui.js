@@ -79,6 +79,31 @@ export function openModal(opts) {
       input.className = 'field-input';
       if (f.placeholder) input.placeholder = f.placeholder;
     }
+    // determine autocomplete attribute
+    try {
+      if (f.autocomplete) {
+        input.setAttribute('autocomplete', f.autocomplete);
+      } else if (input && input.type === 'password') {
+        // if the modal is for creating a new entity (title or submitText contains keywords), suggest new-password
+        const ctx = String((title || '') + ' ' + (submitText || '')).trim();
+        const isNew = /جدید|ثبت|افزودن|جدید/i.test(ctx);
+        input.setAttribute('autocomplete', isNew ? 'new-password' : 'current-password');
+      } else if (f.name === 'username' || (f.name && String(f.name).toLowerCase().includes('user'))) {
+        input.setAttribute('autocomplete', 'username');
+      } else if (input && input.type === 'email') {
+        input.setAttribute('autocomplete', 'email');
+      } else if (f.name && /first|given/i.test(f.name)) {
+        input.setAttribute('autocomplete', 'given-name');
+      } else if (f.name && /last|family/i.test(f.name)) {
+        input.setAttribute('autocomplete', 'family-name');
+      } else if (f.name && /phone|tel/i.test(f.name)) {
+        input.setAttribute('autocomplete', 'tel');
+      } else if (f.name && /address/i.test(f.name)) {
+        input.setAttribute('autocomplete', 'street-address');
+      }
+    } catch (e) {
+      // ignore attribute setting errors
+    }
     input.id = `mf-${f.name}`; input.name = f.name;
     if (!f.optional && f.type !== 'select') input.required = true;
     if (initialValues[f.name] !== undefined) {

@@ -1,4 +1,4 @@
-import { changeMenu } from "./js/header.js";
+import { changeMenu, initHeaderUI, updateTypeIndicatorToSelected } from "./js/header.js";
 import { fetchCategories, fetchProducts } from "./js/api.js";
 import { initMobileDrawer } from "../../../public/assets/js/main.js";
 import { createCard } from "../../components/product-card/createCard.js";
@@ -59,12 +59,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		const fragment = document.createDocumentFragment();
 
-		productsList.forEach((product) => {
-			fragment.appendChild(createCard(product));
+		productsList.forEach((product, i) => {
+			const card = createCard(product);
+			card.style.animationDelay = `${i * 0.04}s`;
+			fragment.appendChild(card);
 		});
 
 		menuMain.appendChild(fragment);
 	}
+
+	// initialize header UI enhancements (indicator, scroll hide, keyboard nav)
+	try {
+		initHeaderUI();
+	} catch (e) {}
 
 	// Render categories for the current menu type
 	if (cafeCats) {
@@ -72,6 +79,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			if (getCurrentMenu() === "cafe") return;
 
 			const selectedId = changeMenu("cafe", window.__categories__);
+			try { updateTypeIndicatorToSelected(); } catch (e) {}
 			if (selectedId != null) {
 				const prods = await getProductsByCategory(selectedId);
 				renderProducts(prods);
@@ -85,6 +93,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			if (getCurrentMenu() === "restaurant") return;
 
 			const selectedId = changeMenu("restaurant", window.__categories__);
+			try { updateTypeIndicatorToSelected(); } catch (e) {}
 			if (selectedId != null) {
 				const prods = await getProductsByCategory(selectedId);
 				renderProducts(prods);
@@ -98,6 +107,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			if (getCurrentMenu() === "breakfast") return;
 
 			const selectedId = changeMenu("breakfast", window.__categories__);
+			try { updateTypeIndicatorToSelected(); } catch (e) {}
 			if (selectedId != null) {
 				const prods = await getProductsByCategory(selectedId);
 				renderProducts(prods);
@@ -116,6 +126,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			e.preventDefault();
 			categoriesContainer.querySelectorAll("li").forEach((n) => n.classList.remove("selected"));
 			li.classList.add("selected");
+			try { updateTypeIndicatorToSelected(); } catch (e) {}
 
 			const raw = li.dataset.categoryId;
 			const categoryId = raw !== undefined ? Number(raw) : NaN;
@@ -141,6 +152,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 
 	const initCat = changeMenu(getCurrentMenu(), categories);
+	try { updateTypeIndicatorToSelected(); } catch (e) {}
 	if (initCat != null) {
 		const prods = await getProductsByCategory(initCat);
 		renderProducts(prods);

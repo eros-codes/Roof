@@ -3,6 +3,7 @@ import { initTheme, closeModal, openModal, toast, confirm, ICONS } from './asset
 import { state } from './assets/js/state.js';
 import { mkBtn, emptyState } from './assets/js/helpers.js';
 import { loadReviews, renderReviews } from './assets/js/reviews.js';
+import { loadUsers, renderUsers } from './assets/js/users.js';
 import { loadProducts, renderProducts } from './assets/js/products.js';
 import { loadCategories, renderCategories } from './assets/js/categories.js';
 
@@ -30,8 +31,11 @@ async function loadSection(section) {
 		} else if (section === 'categories') {
 			await Promise.all([loadCategories(), loadProducts()]);
 			renderCategories();
+		} else if (section === 'users') {
+			await loadUsers();
+			await renderUsers();
 		}
-	} catch (err) {
+		} catch (err) {
 		el.innerHTML = `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p class="empty-title">خطا در بارگذاری</p><p class="empty-sub">${err.message}</p></div>`;
 	}
 }
@@ -103,7 +107,7 @@ function showDashboard(username) {
 
 function logout() { api.token.remove(); window.location.href = 'index.html'; }
 
-function init() {
+async function init() {
 	const loginForm = document.getElementById('login-form');
 	if (loginForm) {
 		loginForm.addEventListener('submit', handleLogin);
@@ -119,8 +123,11 @@ function init() {
 	if (dashEl) {
 		if (!api.token.exists()) { window.location.href = 'index.html'; return; }
 		const logoutBtn = document.getElementById('logout-btn'); if (logoutBtn) logoutBtn.addEventListener('click', logout);
-		attachSidebarBehavior(); attachModalHandlers(); navigate('reviews');
+		attachSidebarBehavior(); attachModalHandlers();
+		await api.admins.getAll();
+		if (!api.token.exists()) return;
+		navigate('reviews');
 	}
 }
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => { init().catch(() => {}); });

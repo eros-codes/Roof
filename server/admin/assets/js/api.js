@@ -75,6 +75,14 @@ export const categories = {
   delete: (id)       => req("DELETE", `/categories/${id}`),
 };
 
+// ── Admins (management)
+export const admins = {
+  getAll: ()         => req('GET',    '/admins'),
+  create: (body)     => req('POST',   '/admins', body),
+  update: (id, body) => req('PATCH',  `/admins/${id}`, body),
+  delete: (id)       => req('DELETE', `/admins/${id}`),
+};
+
 // Upload image (multipart/form-data)
 export async function uploadImage(file) {
   const fd = new FormData();

@@ -4,6 +4,7 @@ import { upload } from "../middleware/upload.js";
 import { loginLimiter } from "../middleware/rateLimiter.js";
 import {
 	login,
+	getAdmins, createAdmin, updateAdmin, deleteAdmin,
 	getAllReviews, updateReview,   deleteReview,
 	getAdminProducts, createProduct, updateProduct, deleteProduct,
 	getAdminCategories, createCategory, updateCategory, deleteCategory,
@@ -37,5 +38,11 @@ router.get("/categories",      getAdminCategories);
 router.post("/categories",     createCategory);
 router.patch("/categories/:id",  updateCategory);
 router.delete("/categories/:id", deleteCategory);
+
+// admins management
+router.get("/admins", getAdmins);
+router.post("/admins", createAdmin);
+router.patch("/admins/:id", updateAdmin);
+router.delete("/admins/:id", deleteAdmin);
 
 export default router;

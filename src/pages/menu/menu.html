@@ -14,7 +14,7 @@
 		<header class="menu-header">
 			<div class="menu-header-top">
 				<div class="menu-header-right">
-					<button id="mobile-hamburger" class="mobile-hamburger" aria-label="opemimg menu">
+					<button id="mobile-hamburger" class="mobile-hamburger" aria-label="باز کردن منو" aria-controls="mobile-drawer" aria-expanded="false">
 						<span class="hamburger-icon">
 							<span></span>
 							<span></span>
@@ -31,9 +31,10 @@
 					<button id="breakfast-cats" data-menu="breakfast">صبحانه</button>
 				</div>
 			</div>
-			<nav class="menu-nav">
-				<ul class="menu-categories">
+			<nav class="menu-nav" role="navigation" aria-label="منوی دسته‌بندی‌ها">
+				<ul id="menu-categories" class="menu-categories" role="list">
 				</ul>
+				<!-- sliding indicator injected via JS -->
 			</nav>
 		</header>
 	

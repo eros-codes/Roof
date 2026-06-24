@@ -45,6 +45,7 @@
 	justify-content: end;
 	gap: 1rem;
 	padding: 0 1rem;
+	position: relative;
 }
 .menu-options button {
 	padding: 0.5rem 0;
@@ -56,7 +57,7 @@
 	transition: border-bottom 0.3s ease, color 0.3s ease;
 }
 .menu-options button:hover {
-	border-bottom: 2px solid var(--header-options-hover);
+	color: white;
 }
 .menu-nav {
 	width: 100%;
@@ -94,7 +95,6 @@
 }
 .menu-options button.selected {
 	color: white;
-	border-bottom: 2px solid var(--header-options-hover);
 }
 .menu-categories li.selected{
 	background-color: var(--header-options-hover);
@@ -102,4 +102,33 @@
 }
 .mobile-hamburger {
 	display: none;
+}
+
+.menu-nav {
+	position: relative;
+}
+.menu-categories {
+	position: relative;
+}
+
+.menu-categories a:focus-visible,
+.menu-options button:focus-visible {
+	outline: 3px solid var(--blue);
+	outline-offset: 2px;
+	border-radius: 6px;
+}
+
+/* type indicator for menu options */
+.menu-options .type-indicator {
+	position: absolute;
+	bottom: 6px;
+	left: 0;
+	height: 3px;
+	width: 0;
+	background: var(--header-options-hover);
+	border-radius: 3px;
+	transform: translateX(0);
+	transition: transform .32s cubic-bezier(.2,.9,.2,1), width .32s cubic-bezier(.2,.9,.2,1), opacity .2s ease;
+	opacity: 0;
+	pointer-events: none;
 }

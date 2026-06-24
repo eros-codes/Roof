@@ -43,7 +43,15 @@ model Admin {
   id        Int      @id @default(autoincrement())
   username  String   @unique
   password  String
+  firstName String   @default("admin")
+  lastName  String   @default("admin")
+  role      Role     @default(SECONDARY)
   createdAt DateTime @default(now())
 
   @@map("admins")
+}
+
+enum Role {
+  MAIN
+  SECONDARY
 }
