@@ -13,17 +13,23 @@ export function initMobileDrawer() {
 	function openDrawer() {
 		drawer.classList.add("open");
 		backdrop.classList.add("visible");
+		drawer.removeAttribute("inert");
 		drawer.setAttribute("aria-hidden", "false");
 		hamburger.setAttribute("aria-expanded", "true");
+		closeBtn.focus();
 		// prevent background scroll
 		document.documentElement.style.overflow = "hidden";
 		document.body.style.overflow = "hidden";
 	}
 
 	function closeDrawer() {
+		if (drawer.contains(document.activeElement)) {
+			hamburger.focus();
+		}
 		drawer.classList.remove("open");
 		backdrop.classList.remove("visible");
 		drawer.setAttribute("aria-hidden", "true");
+		drawer.setAttribute("inert", "");
 		hamburger.setAttribute("aria-expanded", "false");
 		document.documentElement.style.overflow = "";
 		document.body.style.overflow = "";
