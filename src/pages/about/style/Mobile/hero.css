@@ -12,7 +12,7 @@
 .s-hero__bg {
 	position: absolute;
 	inset: -15%;
-	background-image: url("../../../../../public/assets/images/2026-06-14\ 01.04.48.jpg");
+	background-image: url("../../../../../public/assets/images/hero-bg.jpg");
 	background-size: cover;
 	background-position: center;
 }
