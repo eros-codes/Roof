@@ -1,6 +1,6 @@
 import * as api from './api.js';
 import { state } from './state.js';
-import { mkBtn, emptyState } from './helpers.js';
+import { mkBtn, emptyState, escapeHtml } from './helpers.js';
 import { openModal, toast, confirm } from './ui.js';
 
 export async function loadCategories() {
@@ -45,7 +45,7 @@ export function renderCategories() {
   listItems.forEach((c) => {
     const count = state.products.filter(p => p.categoryId === c.id).length;
     const row = document.createElement('div'); row.className = 'category-row';
-    row.innerHTML = `\n      <div class="category-info">\n        <span class="badge badge--${c.type}">${c.type}</span>\n        <span class="category-name">${c.name}</span>\n        <span style="color:var(--quaternary-text-color);font-size:.75rem">${count} محصول</span>\n      </div>\n      <div class="category-actions"></div>`;
+    row.innerHTML = `\n      <div class="category-info">\n        <span class="badge badge--${c.type}">${escapeHtml(c.type)}</span>\n        <span class="category-name">${escapeHtml(c.name)}</span>\n        <span style="color:var(--quaternary-text-color);font-size:.75rem">${count} محصول</span>\n      </div>\n      <div class="category-actions"></div>`;
     const actions = row.querySelector('.category-actions');
     const editBtn = mkBtn('ویرایش', 'btn--ghost btn--sm'); editBtn.onclick = () => editCategory(c); actions.appendChild(editBtn);
     const delBtn = mkBtn('حذف', 'btn--danger btn--sm'); delBtn.onclick = () => deleteCategory(c.id, count); actions.appendChild(delBtn);
@@ -56,13 +56,19 @@ export function renderCategories() {
 
 export function addCategory() {
   openModal({ title: 'دسته‌بندی جدید', fields: catFields(), submitText: 'افزودن', onSubmit: async (data) => {
-    await api.categories.create(data); toast('دسته‌بندی اضافه شد', 'success'); [state.categories, state.products] = await Promise.all([api.categories.getAll(), api.products.getAll()]); renderCategories();
+    const createdCategory = await api.categories.create(data);
+    state.categories.push(createdCategory);
+    toast('دسته‌بندی اضافه شد', 'success');
+    renderCategories();
   }});
 }
 
 export function editCategory(c) {
   openModal({ title: 'ویرایش دسته‌بندی', fields: catFields(), initialValues: c, submitText: 'ذخیره', onSubmit: async (data) => {
-    await api.categories.update(c.id, data); toast('دسته‌بندی ویرایش شد', 'success'); [state.categories, state.products] = await Promise.all([api.categories.getAll(), api.products.getAll()]); renderCategories();
+    const updatedCategory = await api.categories.update(c.id, data);
+    state.categories = state.categories.map((item) => (item.id === c.id ? updatedCategory : item));
+    toast('دسته‌بندی ویرایش شد', 'success');
+    renderCategories();
   }});
 }
 
@@ -73,5 +79,12 @@ export async function deleteCategory(id, count) {
   } else {
     const ok = await confirm('این دسته‌بندی حذف می‌شود. مطمئنید؟', 'حذف دسته‌بندی'); if (!ok) return;
   }
-  try { await api.categories.delete(id); toast('دسته‌بندی حذف شد', 'success'); [state.categories, state.products] = await Promise.all([api.categories.getAll(), api.products.getAll()]); renderCategories(); } catch (e) { toast(e.message, 'error'); }
+  try {
+    await api.categories.delete(id);
+    state.categories = state.categories.filter((item) => item.id !== id);
+    toast('دسته‌بندی حذف شد', 'success');
+    renderCategories();
+  } catch (e) {
+    toast(e.message, 'error');
+  }
 }

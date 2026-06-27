@@ -43,6 +43,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 			return Array.isArray(prods) ? prods : [];
 		} catch (e) {
 			console.error("Failed to fetch products:", e);
+			// If it's a server/network error (no client validation status),
+			// return null so callers can show a connection error instead of
+			// misleading 'no products' message.
+			if (!e || !e.status || e.status >= 500) return null;
 			return [];
 		}
 	}
@@ -78,11 +82,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 		cafeCats.addEventListener("click", async () => {
 			if (getCurrentMenu() === "cafe") return;
 
+			// Ensure categories are available (in case user clicks fast before initial fetch)
+			if (!window.__categories__) {
+				try { window.__categories__ = await fetchCategories(); } catch (e) { window.__categories__ = []; }
+			}
 			const selectedId = changeMenu("cafe", window.__categories__);
 			try { updateTypeIndicatorToSelected(); } catch (e) {}
 			if (selectedId != null) {
 				const prods = await getProductsByCategory(selectedId);
-				renderProducts(prods);
+				if (prods === null) {
+					menuMain.textContent = 'خطا در ارتباط با سرور. لطفاً بعداً تلاش کنید.';
+				} else {
+					renderProducts(prods);
+				}
 			} else {
 				renderProducts([]);
 			}
@@ -91,7 +103,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 	if (restCats) {
 		restCats.addEventListener("click", async () => {
 			if (getCurrentMenu() === "restaurant") return;
-
+			if (!window.__categories__) {
+				try { window.__categories__ = await fetchCategories(); } catch (e) { window.__categories__ = []; }
+			}
 			const selectedId = changeMenu("restaurant", window.__categories__);
 			try { updateTypeIndicatorToSelected(); } catch (e) {}
 			if (selectedId != null) {
@@ -105,7 +119,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 	if (bfCats) {
 		bfCats.addEventListener("click", async () => {
 			if (getCurrentMenu() === "breakfast") return;
-
+			if (!window.__categories__) {
+				try { window.__categories__ = await fetchCategories(); } catch (e) { window.__categories__ = []; }
+			}
 			const selectedId = changeMenu("breakfast", window.__categories__);
 			try { updateTypeIndicatorToSelected(); } catch (e) {}
 			if (selectedId != null) {
@@ -134,7 +150,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 			safeLocal.set("currentCategory", String(categoryId));
 
 			const prods = await getProductsByCategory(categoryId);
-			renderProducts(prods);
+			if (prods === null) {
+				menuMain.textContent = 'خطا در ارتباط با سرور. لطفاً بعداً تلاش کنید.';
+			} else {
+				renderProducts(prods);
+			}
 		});
 	}
 
@@ -155,7 +175,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 	try { updateTypeIndicatorToSelected(); } catch (e) {}
 	if (initCat != null) {
 		const prods = await getProductsByCategory(initCat);
-		renderProducts(prods);
+		if (prods === null) {
+			menuMain.textContent = 'خطا در ارتباط با سرور. لطفاً بعداً تلاش کنید.';
+		} else {
+			renderProducts(prods);
+		}
 	} else {
 		renderProducts([]);
 	}

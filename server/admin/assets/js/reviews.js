@@ -1,6 +1,6 @@
 import * as api from './api.js';
 import { toast, openModal, confirm } from './ui.js';
-import { mkBtn, emptyState } from './helpers.js';
+import { mkBtn, emptyState, escapeHtml } from './helpers.js';
 import { state } from './state.js';
 
 export async function loadReviews() {
@@ -42,26 +42,58 @@ export function renderReviews() {
   const listEl = document.createElement('div');
   listEl.className = 'reviews-list';
   list.forEach((r) => {
-    const initials = r.name ? r.name.trim()[0] : '؟';
+    const initials = r.name ? String(r.name).trim()[0] : '؟';
     const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleDateString('fa-IR') : '—';
     const card = document.createElement('div');
     card.className = `review-card review-card--${r.visible ? 'approved' : 'pending'}`;
-    card.innerHTML = `\n      <div class="review-top">\n        <div class="review-author">\n          <div class="review-avatar">${initials}</div>\n          <div>\n            <div class="review-name">${r.name || 'ناشناس'}</div>\n            <div class="review-date">${dateStr}</div>\n          </div>\n        </div>\n        <span class="badge badge--${r.visible ? 'approved' : 'pending'}">${r.visible ? 'تأیید شده' : 'در انتظار'}</span>\n      </div>\n      <p class="review-text">${r.text}</p>\n      ${r.reply ? `<div class="review-reply"><div class="review-reply-label">پاسخ روف</div>${r.reply}</div>` : ''}\n      <div class="review-actions"></div>`;
+    card.innerHTML = `\n      <div class="review-top">\n        <div class="review-author">\n          <div class="review-avatar">${escapeHtml(initials)}</div>\n          <div>\n            <div class="review-name">${escapeHtml(r.name) || 'ناشناس'}</div>\n            <div class="review-date">${dateStr}</div>\n          </div>\n        </div>\n        <span class="badge badge--${r.visible ? 'approved' : 'pending'}">${r.visible ? 'تأیید شده' : 'در انتظار'}</span>\n      </div>\n      <p class="review-text">${escapeHtml(r.text)}</p>\n      ${r.reply ? `<div class="review-reply"><div class="review-reply-label">پاسخ روف</div>${escapeHtml(r.reply)}</div>` : ''}\n      <div class="review-actions"></div>`;
     const actions = card.querySelector('.review-actions');
     if (!r.visible) {
       const approveBtn = mkBtn('تأیید', 'btn--success btn--sm');
-      approveBtn.onclick = async () => { await api.reviews.update(r.id, { visible: true }); toast('نظر تأیید شد', 'success'); state.reviews = await api.reviews.getAll(); renderReviews(); };
+      approveBtn.onclick = async () => {
+        try {
+          const updated = await api.reviews.update(r.id, { visible: true });
+          state.reviews = state.reviews.map((item) => (item.id === r.id ? updated : item));
+          toast('نظر تأیید شد', 'success');
+          renderReviews();
+        } catch (e) {
+          toast(e.message || 'خطا در تأیید نظر', 'error');
+          console.error('approve review failed', e);
+        }
+      };
       actions.appendChild(approveBtn);
     } else {
       const rejectBtn = mkBtn('رد کردن', 'btn--ghost btn--sm');
-      rejectBtn.onclick = async () => { await api.reviews.update(r.id, { visible: false }); toast('نظر رد شد', 'info'); state.reviews = await api.reviews.getAll(); renderReviews(); };
+      rejectBtn.onclick = async () => {
+        try {
+          const updated = await api.reviews.update(r.id, { visible: false });
+          state.reviews = state.reviews.map((item) => (item.id === r.id ? updated : item));
+          toast('نظر رد شد', 'info');
+          renderReviews();
+        } catch (e) {
+          toast(e.message || 'خطا در رد کردن نظر', 'error');
+          console.error('reject review failed', e);
+        }
+      };
       actions.appendChild(rejectBtn);
     }
     const replyBtn = mkBtn(r.reply ? 'ویرایش پاسخ' : 'پاسخ', 'btn--ghost btn--sm');
     replyBtn.onclick = () => replyToReview(r);
     actions.appendChild(replyBtn);
     const deleteBtn = mkBtn('حذف', 'btn--danger btn--sm');
-    deleteBtn.onclick = async () => { const ok = await confirm('این نظر برای همیشه حذف می‌شود. ادامه می‌دهید؟', 'حذف نظر'); if (!ok) return; await api.reviews.delete(r.id); toast('نظر حذف شد', 'success'); state.reviews = await api.reviews.getAll(); renderReviews(); };
+    deleteBtn.onclick = async () => {
+      try {
+        const ok = await confirm('این نظر برای همیشه حذف می‌شود. ادامه می‌دهید؟', 'حذف نظر');
+        if (!ok) return;
+        await api.reviews.delete(r.id);
+        state.reviews = state.reviews.filter((item) => item.id !== r.id);
+        toast('نظر حذف شد', 'success');
+        renderReviews();
+      } catch (e) {
+        toast(e.message || 'خطا در حذف نظر', 'error');
+        console.error('delete review failed', e);
+      }
+    };
     actions.appendChild(deleteBtn);
     listEl.appendChild(card);
   });
@@ -74,7 +106,12 @@ function replyToReview(r) {
     fields: [{ name: 'reply', label: 'متن پاسخ', type: 'textarea', wide: true, placeholder: 'پاسخ روف...' }],
     initialValues: { reply: r.reply || '' },
     submitText: 'ارسال پاسخ',
-    onSubmit: async ({ reply }) => { await api.reviews.update(r.id, { reply: reply.trim() || null }); toast('پاسخ ثبت شد', 'success'); state.reviews = await api.reviews.getAll(); renderReviews(); },
+    onSubmit: async ({ reply }) => {
+      const updated = await api.reviews.update(r.id, { reply: reply.trim() || null });
+      state.reviews = state.reviews.map((item) => (item.id === r.id ? updated : item));
+      toast('پاسخ ثبت شد', 'success');
+      renderReviews();
+    },
   });
 }
 

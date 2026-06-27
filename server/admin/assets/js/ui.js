@@ -1,4 +1,3 @@
-import { state } from './state.js';
 export const ICONS = {
   success: `<svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
   error: `<svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
@@ -101,7 +100,7 @@ export function openModal(opts) {
       } else if (f.name && /address/i.test(f.name)) {
         input.setAttribute('autocomplete', 'street-address');
       }
-    } catch (e) {
+    } catch (ignored) {
       // ignore attribute setting errors
     }
     input.id = `mf-${f.name}`; input.name = f.name;
@@ -132,9 +131,26 @@ export function openModal(opts) {
 export function closeModal() { document.getElementById('modal-backdrop').hidden = true; document.getElementById('modal-body').innerHTML = ''; }
 
 export function initTheme() {
-  try { const stored = localStorage.getItem(THEME_KEY); const theme = stored === 'dark' ? 'dark' : 'light'; applyTheme(theme); } catch (e) {}
+  try {
+    const stored = localStorage.getItem(THEME_KEY);
+    const theme = stored === 'dark' ? 'dark' : 'light';
+    applyTheme(theme);
+  } catch (_) {
+    /* ignore localStorage access failures */
+  }
   const btn = document.getElementById('theme-toggle');
-  if (btn) btn.addEventListener('click', () => { const isDark = document.documentElement.classList.contains('theme-dark'); const next = isDark ? 'light' : 'dark'; applyTheme(next); try { localStorage.setItem(THEME_KEY, next); } catch (e) {} });
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.contains('theme-dark');
+      const next = isDark ? 'light' : 'dark';
+      applyTheme(next);
+      try {
+        localStorage.setItem(THEME_KEY, next);
+      } catch (_) {
+        /* ignore localStorage write failures */
+      }
+    });
+  }
 }
 
 function setToggleIcon(btn, theme) { if (!btn) return; btn.innerHTML = theme === 'dark' ? ICON_MOON : ICON_SUN; }

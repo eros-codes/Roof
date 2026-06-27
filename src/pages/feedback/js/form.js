@@ -40,7 +40,14 @@ export function initForm() {
 			charCount.textContent = `۰ / ${MAX.toLocaleString("fa-IR")}`;
 			showFeedback("نظر شما ثبت شد و پس از بررسی نمایش داده خواهد شد 🙏", "success");
 		} catch (err) {
-			// Fallback: store in pending queue in localStorage
+			// If it's a client error (validation) or rate-limit, surface the message
+			if (err && err.status && err.status >= 400 && err.status < 500) {
+				setLoading(false);
+				showFeedback(err.message || 'خطا در ثبت نظر', 'error');
+				return;
+			}
+
+			// Network or server error: store in pending queue in localStorage for retry
 			try {
 				const entry = {
 					id: Date.now(),
@@ -63,6 +70,39 @@ export function initForm() {
 			showFeedback("اتصال به سرور برقرار نشد؛ نظر شما آفلاین ذخیره شد.", "success");
 		}
 	});
+
+	// Attempt to sync pending reviews on load and when back online
+	async function syncPending() {
+		try {
+			const pending = JSON.parse(localStorage.getItem("pendingReviews") || "[]");
+			if (!Array.isArray(pending) || pending.length === 0) return;
+			const remaining = [];
+			for (const entry of pending) {
+				try {
+					await postReview({ name: entry.name, text: entry.text });
+					// successful -> continue
+				} catch (e) {
+					// if client error, drop it; otherwise keep for later
+					if (e && e.status && e.status >= 400 && e.status < 500) {
+						// don't retry bad entries
+						continue;
+					}
+					remaining.push(entry);
+				}
+			}
+			if (remaining.length === 0) {
+				localStorage.removeItem("pendingReviews");
+				showFeedback('نظرات آفلاین با موفقیت همگام‌سازی شدند.', 'success');
+			} else {
+				localStorage.setItem("pendingReviews", JSON.stringify(remaining));
+			}
+		} catch (e) { /* ignore sync errors */ }
+	}
+
+	// run sync once on init
+	syncPending();
+	// try again when browser regains network
+	window.addEventListener('online', () => { syncPending(); });
 
 	// Helpers 
 	function setLoading(on) {

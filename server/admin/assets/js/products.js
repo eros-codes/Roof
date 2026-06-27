@@ -1,6 +1,6 @@
 import * as api from './api.js';
 import { state, getCatName, getCatType } from './state.js';
-import { mkBtn, emptyState } from './helpers.js';
+import { mkBtn, emptyState, escapeHtml } from './helpers.js';
 import { openModal, toast, confirm, ICONS } from './ui.js';
 
 export async function loadProducts() {
@@ -103,20 +103,15 @@ export function renderProducts() {
   el.appendChild(grid);
 }
 
-function escapeHtml(str) {
-  if (str === undefined || str === null) return '';
-  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
 export function addProduct() {
   openModal({
     title: 'محصول جدید',
     fields: productFields(),
     submitText: 'افزودن',
     onSubmit: async (data) => {
-      await api.products.create({ ...data, price: Number(data.price), categoryId: Number(data.categoryId) });
+      const createdProduct = await api.products.create({ ...data, price: Number(data.price), categoryId: Number(data.categoryId) });
+      state.products.push(createdProduct);
       toast('محصول اضافه شد', 'success');
-      state.products = await api.products.getAll();
       renderProducts();
     },
   });
@@ -130,9 +125,9 @@ export function editProduct(p) {
     initialValues: { ...p, categoryId: String(p.categoryId) },
     submitText: 'ذخیره تغییرات',
     onSubmit: async (data) => {
-      await api.products.update(p.id, { ...data, price: Number(data.price), categoryId: Number(data.categoryId) });
+      const updatedProduct = await api.products.update(p.id, { ...data, price: Number(data.price), categoryId: Number(data.categoryId) });
+      state.products = state.products.map((item) => (item.id === p.id ? updatedProduct : item));
       toast('محصول ویرایش شد', 'success');
-      state.products = await api.products.getAll();
       renderProducts();
     },
   });
@@ -172,5 +167,12 @@ export function injectImageUpload(currentImage) {
 
 export async function deleteProduct(id) {
   const ok = await confirm('این محصول حذف می‌شود. مطمئنید؟', 'حذف محصول'); if (!ok) return;
-  try { await api.products.delete(id); toast('محصول حذف شد', 'success'); state.products = await api.products.getAll(); renderProducts(); } catch (e) { toast(e.message, 'error'); }
+  try {
+    await api.products.delete(id);
+    state.products = state.products.filter((product) => product.id !== id);
+    toast('محصول حذف شد', 'success');
+    renderProducts();
+  } catch (e) {
+    toast(e.message, 'error');
+  }
 }

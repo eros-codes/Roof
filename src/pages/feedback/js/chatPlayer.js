@@ -62,11 +62,15 @@ function transition(nextIndex, dir = "next") {
 }
 
 function goNext() {
-	transition((currentIndex + 1) % getVisible().length, "next");
+	const len = getVisible().length;
+	if (len <= 1) return;
+	transition((currentIndex + 1) % len, "next");
 }
 
 function goPrev() {
-	transition((currentIndex - 1 + getVisible().length) % getVisible().length, "prev");
+	const len = getVisible().length;
+	if (len <= 1) return;
+	transition((currentIndex - 1 + len) % len, "prev");
 }
 
 function goTo(index) {
@@ -78,6 +82,7 @@ function goTo(index) {
 // Timer
 function startTimer() {
 	stopTimer();
+	if (getVisible().length <= 1) return; // nothing to rotate
 	timer = setInterval(goNext, DURATION);
 }
 

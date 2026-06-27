@@ -4,23 +4,26 @@
 // relative `/api/admin` path (works when served by the backend itself).
 const API_ORIGIN = (typeof window !== "undefined" && window.__API_ORIGIN__) ? window.__API_ORIGIN__ : "";
 const BASE = API_ORIGIN ? `${API_ORIGIN.replace(/\/$/, '')}/api/admin` : "/api/admin";
+export { BASE };
 
 // ── Token ──────────────────────────────────────────────────────────
+// We no longer store the JWT in localStorage. The server sets an HttpOnly
+// cookie `roof_admin_token` on login. For the UI we keep a non-sensitive
+// local flag to track whether we're authenticated for redirect decisions.
 export const token = {
-  get:    ()    => localStorage.getItem("roof_admin_token"),
-  set:    (t)   => localStorage.setItem("roof_admin_token", t),
-  remove: ()    => localStorage.removeItem("roof_admin_token"),
-  exists: ()    => !!localStorage.getItem("roof_admin_token"),
+  get:    ()    => localStorage.getItem("roof_admin_logged_in"),
+  set:    ()    => { try { localStorage.setItem("roof_admin_logged_in", "1"); } catch (ignored) { /* ignore */ } },
+  remove: ()    => { try { localStorage.removeItem("roof_admin_logged_in"); } catch (ignored) { /* ignore */ } },
+  exists: ()    => !!localStorage.getItem("roof_admin_logged_in"),
 };
 
 // ── Core request ───────────────────────────────────────────────────
 async function req(method, path, body) {
   const headers = { "Content-Type": "application/json" };
-  const t = token.get();
-  if (t) headers["Authorization"] = `Bearer ${t}`;
 
   const res = await fetch(`${BASE}${path}`, {
     method,
+    credentials: 'include',
     headers,
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
   });
@@ -30,10 +33,10 @@ async function req(method, path, body) {
   if (res.status === 401) {
     // Session expired or invalid token: remove token and redirect to login.
     token.remove();
-    try { localStorage.setItem('roof_session_expired', '1'); } catch (e) {}
+    try { localStorage.setItem('roof_session_expired', '1'); } catch (ignored) { /* ignore */ }
     // Redirect to the admin login page (relative path).
     window.location.href = 'index.html';
-    return;
+    throw new Error('Unauthorized');
   }
 
   if (!res.ok) throw new Error(data.error || `خطای ${res.status}`);
@@ -44,12 +47,13 @@ async function req(method, path, body) {
 export async function login(username, password) {
   const res = await fetch(`${BASE}/login`, {
     method: "POST",
+    credentials: 'include',
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || "خطا در ورود");
-  return data; // { token }
+  return data; // { success: true }
 }
 
 // ── Reviews ────────────────────────────────────────────────────────
@@ -83,18 +87,18 @@ export const admins = {
   delete: (id)       => req('DELETE', `/admins/${id}`),
 };
 
+export const auth = {
+  me: () => req('GET', '/me'),
+};
+
 // Upload image (multipart/form-data)
 export async function uploadImage(file) {
   const fd = new FormData();
   fd.append('image', file);
 
-  const headers = {};
-  const t = token.get();
-  if (t) headers["Authorization"] = `Bearer ${t}`;
-
   const res = await fetch(`${BASE}/upload`, {
     method: 'POST',
-    headers,
+    credentials: 'include',
     body: fd,
   });
 

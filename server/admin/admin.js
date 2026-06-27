@@ -1,7 +1,6 @@
 import * as api from './assets/js/api.js';
-import { initTheme, closeModal, openModal, toast, confirm, ICONS } from './assets/js/ui.js';
+import { initTheme, closeModal } from './assets/js/ui.js';
 import { state } from './assets/js/state.js';
-import { mkBtn, emptyState } from './assets/js/helpers.js';
 import { loadReviews, renderReviews } from './assets/js/reviews.js';
 import { loadUsers, renderUsers } from './assets/js/users.js';
 import { loadProducts, renderProducts } from './assets/js/products.js';
@@ -87,25 +86,22 @@ async function handleLogin(e) {
 	errEl.hidden = true; text.hidden = true; spinner.hidden = false; btn.disabled = true;
 	try {
 		const { username, password } = Object.fromEntries(new FormData(form));
-		const { token } = await api.login(username, password);
-		api.token.set(token);
+		await api.login(username, password);
+		// Server set HttpOnly cookie; mark UI as authenticated and redirect.
+		api.token.set();
 		window.location.href = 'dashboard.html';
 	} catch (err) { errEl.textContent = err.message; errEl.hidden = false; } finally { text.hidden = false; spinner.hidden = true; btn.disabled = false; }
 }
 
-function showDashboard(username) {
-	const dashEl = document.getElementById('dashboard-view');
-	if (dashEl) {
-		const loginViewEl = document.getElementById('login-view'); if (loginViewEl) loginViewEl.hidden = true;
-		dashEl.hidden = false;
-		const userEl = document.getElementById('sidebar-username'); if (userEl) userEl.textContent = username || 'ادمین';
-		attachSidebarBehavior(); attachModalHandlers(); navigate('reviews');
-		return;
-	}
-	window.location.href = 'dashboard.html';
+async function logout() {
+  try {
+    await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
+  } catch (ignored) {
+    // ignore network/logout errors and continue clearing local auth state
+  }
+  api.token.remove();
+  window.location.href = 'index.html';
 }
-
-function logout() { api.token.remove(); window.location.href = 'index.html'; }
 
 async function init() {
 	const loginForm = document.getElementById('login-form');
@@ -115,19 +111,35 @@ async function init() {
 		if (localStorage.getItem('roof_session_expired')) {
 			const errEl = document.getElementById('login-error');
 			if (errEl) { errEl.textContent = 'نشست شما منقضی شد؛ لطفاً دوباره وارد شوید.'; errEl.hidden = false; }
-			try { localStorage.removeItem('roof_session_expired'); } catch (e) {}
+			try { localStorage.removeItem('roof_session_expired'); } catch (ignored) { /* ignore */ }
 		}
 		if (api.token.exists()) window.location.href = 'dashboard.html';
 	}
 	const dashEl = document.getElementById('dashboard-view');
 	if (dashEl) {
-		if (!api.token.exists()) { window.location.href = 'index.html'; return; }
 		const logoutBtn = document.getElementById('logout-btn'); if (logoutBtn) logoutBtn.addEventListener('click', logout);
 		attachSidebarBehavior(); attachModalHandlers();
-		await api.admins.getAll();
-		if (!api.token.exists()) return;
+		try {
+			await api.auth.me();
+		} catch (err) {
+			window.location.href = 'index.html';
+			return;
+		}
+		if (!api.token.exists()) api.token.set();
 		navigate('reviews');
 	}
 }
 
-document.addEventListener('DOMContentLoaded', () => { init().catch(() => {}); });
+document.addEventListener('DOMContentLoaded', () => {
+	init().catch((err) => {
+		console.error('Admin init error:', err);
+		try {
+			const errEl = document.createElement('div');
+			errEl.className = 'admin-init-error';
+			errEl.textContent = 'خطا در بارگذاری داشبورد؛ لطفاً کنسول را بررسی کنید.';
+			document.body.prepend(errEl);
+		} catch (e) {
+			// ignore DOM errors
+		}
+	});
+});

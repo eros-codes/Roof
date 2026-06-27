@@ -15,8 +15,18 @@ export async function getProducts(req, res, next) {
 	try {
 		const { categoryId } = req.query;
 
+		// Validate categoryId if provided
+		let where = undefined;
+		if (categoryId !== undefined) {
+			const num = Number(categoryId);
+			if (!Number.isInteger(num) || num < 1) {
+				return res.status(400).json({ error: 'categoryId نامعتبر است' });
+			}
+			where = { categoryId: num };
+		}
+
 		const products = await prisma.product.findMany({
-			where:   categoryId ? { categoryId: Number(categoryId) } : undefined,
+			where,
 			orderBy: { id: "asc" },
 		});
 

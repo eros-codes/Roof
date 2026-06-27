@@ -8,45 +8,70 @@ datasource db {
 }
 
 model Category {
-  id       Int       @id @default(autoincrement())
-  name     String
-  type     String    // "cafe" | "restaurant" | "breakfast"
-  products Product[]
+  id           Int       @id @default(autoincrement())
+  name         String
+  type         String    // "cafe" | "restaurant" | "breakfast"
+  products     Product[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  createdById  Int?
+  updatedById  Int?
+  createdBy    Admin?    @relation("categoriesCreated", fields: [createdById], references: [id])
+  updatedBy    Admin?    @relation("categoriesUpdated", fields: [updatedById], references: [id])
 
   @@map("categories")
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
-  name        String
-  price       Int
-  description String
-  image       String
-  categoryId  Int
-  category    Category @relation(fields: [categoryId], references: [id])
+  id           Int       @id @default(autoincrement())
+  name         String
+  price        Int
+  description  String
+  image        String
+  categoryId   Int
+  category     Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  createdById  Int?
+  updatedById  Int?
+  createdBy    Admin?    @relation("productsCreated", fields: [createdById], references: [id])
+  updatedBy    Admin?    @relation("productsUpdated", fields: [updatedById], references: [id])
 
+  @@index([categoryId])
   @@map("products")
 }
 
 model Review {
-  id        Int      @id @default(autoincrement())
-  name      String?
-  text      String
-  reply     String?
-  visible   Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id           Int       @id @default(autoincrement())
+  name         String?
+  text         String
+  reply        String?
+  visible      Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  createdById  Int?
+  updatedById  Int?
+  createdBy    Admin?    @relation("reviewsCreated", fields: [createdById], references: [id])
+  updatedBy    Admin?    @relation("reviewsUpdated", fields: [updatedById], references: [id])
 
+  @@index([visible])
   @@map("reviews")
 }
 
 model Admin {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
-  password  String
-  firstName String   @default("admin")
-  lastName  String   @default("admin")
-  role      Role     @default(SECONDARY)
-  createdAt DateTime @default(now())
+  id               Int       @id @default(autoincrement())
+  username         String    @unique
+  password         String
+  firstName        String    @default("admin")
+  lastName         String    @default("admin")
+  role             Role      @default(SECONDARY)
+  createdAt        DateTime  @default(now())
+  createdCategories Category[] @relation("categoriesCreated")
+  updatedCategories Category[] @relation("categoriesUpdated")
+  createdProducts   Product[]  @relation("productsCreated")
+  updatedProducts   Product[]  @relation("productsUpdated")
+  createdReviews    Review[]   @relation("reviewsCreated")
+  updatedReviews    Review[]   @relation("reviewsUpdated")
 
   @@map("admins")
 }

@@ -3,7 +3,7 @@ import { auth } from "../middleware/auth.js";
 import { upload } from "../middleware/upload.js";
 import { loginLimiter } from "../middleware/rateLimiter.js";
 import {
-	login,
+	login, logout, getCurrentAdmin,
 	getAdmins, createAdmin, updateAdmin, deleteAdmin,
 	getAllReviews, updateReview,   deleteReview,
 	getAdminProducts, createProduct, updateProduct, deleteProduct,
@@ -15,9 +15,12 @@ const router = Router();
 
 // بدون نیاز به توکن
 router.post("/login", loginLimiter, login);
+router.post("/logout", logout);
 
 // همه‌ی مسیرهای زیر نیاز به JWT دارن
 router.use(auth);
+
+router.get('/me', getCurrentAdmin);
 
 // نظرات
 router.get("/reviews",     getAllReviews);

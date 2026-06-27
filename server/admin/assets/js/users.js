@@ -1,36 +1,30 @@
 import * as api from './api.js';
 import { toast, openModal, confirm } from './ui.js';
-import { mkBtn, emptyState } from './helpers.js';
+import { mkBtn, emptyState, escapeHtml } from './helpers.js';
 import { state } from './state.js';
+
+let cachedCurrentAdmin = null;
 
 async function getCurrentRole() {
   try {
-    const t = api.token.get();
-    if (!t) return null;
-    const payload = t.split('.')[1];
-    const json = JSON.parse(decodeURIComponent(escape(atob(payload.replace(/-/g, '+').replace(/_/g, '/')))));
-    if (json.role) return json.role;
-    // fallback: fetch admins list and match username from token
-    const username = json.username;
-    if (!username) return null;
-    try {
-      const list = await api.admins.getAll();
-      const me = list.find((a) => a.username === username);
-      return me ? me.role : null;
-    } catch (e) {
-      return null;
-    }
-  } catch (e) { return null; }
+    if (cachedCurrentAdmin) return cachedCurrentAdmin.role;
+    const me = await api.auth.me();
+    cachedCurrentAdmin = me;
+    return me.role;
+  } catch (e) {
+    return null;
+  }
 }
 
-function getCurrentAdminId() {
+async function getCurrentAdminId() {
   try {
-    const t = api.token.get();
-    if (!t) return null;
-    const payload = t.split('.')[1];
-    const json = JSON.parse(decodeURIComponent(escape(atob(payload.replace(/-/g, '+').replace(/_/g, '/')))));
-    return Number(json.id) || null;
-  } catch (e) { return null; }
+    if (cachedCurrentAdmin) return cachedCurrentAdmin.id;
+    const me = await api.auth.me();
+    cachedCurrentAdmin = me;
+    return me.id;
+  } catch (e) {
+    return null;
+  }
 }
 
 export async function loadUsers() {
@@ -65,8 +59,8 @@ export async function renderUsers() {
     const dateStr = u.createdAt ? new Date(u.createdAt).toLocaleDateString('fa-IR') : '—';
     row.innerHTML = `
       <div class="user-info">
-        <div class="user-name">${u.firstName} ${u.lastName}</div>
-        <div class="user-username">@${u.username}</div>
+        <div class="user-name">${escapeHtml(u.firstName)} ${escapeHtml(u.lastName)}</div>
+        <div class="user-username">@${escapeHtml(u.username)}</div>
       </div>
       <div class="user-meta">
         <div class="user-role">${u.role === 'MAIN' ? 'ادمین اصلی' : 'ادمین فرعی'}</div>
@@ -87,15 +81,15 @@ export async function renderUsers() {
         if (!ok) return;
         try {
           await api.admins.delete(u.id);
-          const currentId = getCurrentAdminId();
+          const currentId = await getCurrentAdminId();
           if (currentId === u.id) {
             api.token.remove();
             toast('شما خودتان را حذف کردید؛ خارج می‌شوید.', 'info');
             window.location.href = 'index.html';
             return;
           }
+          state.users = state.users.filter((admin) => admin.id !== u.id);
           toast('ادمین حذف شد', 'success');
-          state.users = await api.admins.getAll();
           renderUsers();
         } catch (e) {
           toast(e.message || 'خطا در حذف ادمین', 'error');
@@ -124,9 +118,9 @@ function openCreateAdminModal() {
       data.firstName = data.firstName || 'admin';
       data.lastName = data.lastName || 'admin';
       data.role = data.role || 'SECONDARY';
-      await api.admins.create(data);
+      const createdAdmin = await api.admins.create(data);
+      state.users.push(createdAdmin);
       toast('ادمین جدید ثبت شد', 'success');
-      state.users = await api.admins.getAll();
       renderUsers();
     }
   });
@@ -148,9 +142,9 @@ function openEditAdminModal(u) {
       const payload = { firstName: data.firstName || 'admin', lastName: data.lastName || 'admin', username: data.username };
       if (data.password) payload.password = data.password;
       if (data.role) payload.role = data.role;
-      await api.admins.update(u.id, payload);
+      const updatedAdmin = await api.admins.update(u.id, payload);
+      state.users = state.users.map((admin) => (admin.id === u.id ? updatedAdmin : admin));
       toast('ویرایش انجام شد', 'success');
-      state.users = await api.admins.getAll();
       renderUsers();
     }
   });

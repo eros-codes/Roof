@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch src/server.js",
-    "admin:dev": "node admin-proxy.js",
     "start": "node src/server.js",
+    "lint": "eslint . --ext .js",
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.js",
     "db:studio": "prisma studio"
@@ -22,6 +22,7 @@
     "multer": "^2.2.0"
   },
   "devDependencies": {
-    "prisma": "^5.22.0"
+    "prisma": "^5.22.0",
+    "eslint": "^8.57.0"
   }
 }

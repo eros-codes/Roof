@@ -18,3 +18,9 @@ export const API_ORIGIN = process.env.API_ORIGIN || `http://localhost:${PORT}`;
 
 export const JWT_SECRET     = process.env.JWT_SECRET     || "dev-secret-change-in-production";
 export const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
+
+// Fail fast in production if a secret is not provided. Using a public
+// fallback in production allows token forgery and must be prevented.
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+	throw new Error('JWT_SECRET must be set when NODE_ENV=production');
+}

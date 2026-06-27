@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PRODUCTS_DIR = path.join(__dirname, "..", "..", "..", "public", "assets", "images", "products");
+const DUMMY_PASSWORD_HASH = "$2a$10$CwTycUXWue0Thq9StjUM0uJ8kdO2yQpQw9P13uX3j9T1g6GteqD6";
 
 async function tryUnlink(filename) {
 	if (!filename) return;
@@ -18,6 +19,63 @@ async function tryUnlink(filename) {
 	} catch (err) {
 		// ignore errors — don't block DB updates
 	}
+}
+
+function isTempUpload(filename) {
+	return typeof filename === 'string' && filename.startsWith('temp-');
+}
+
+async function cleanupTempUpload(filename) {
+	if (isTempUpload(filename)) {
+		await tryUnlink(filename);
+	}
+}
+
+async function cleanupStaleTempUploads() {
+	try {
+		const files = await fs.readdir(PRODUCTS_DIR);
+		const cutoff = Date.now() - 24 * 60 * 60 * 1000; // 24 hours
+		await Promise.all(files.map(async (file) => {
+			if (!isTempUpload(file)) return;
+			const stats = await fs.stat(path.join(PRODUCTS_DIR, file));
+			if (stats.mtimeMs < cutoff) {
+				const inUse = await prisma.product.count({ where: { image: file } });
+				if (inUse === 0) {
+					await fs.unlink(path.join(PRODUCTS_DIR, file));
+				}
+			}
+		}));
+	} catch (err) {
+		// ignore cleanup failures
+	}
+}
+
+function parseDurationToMs(value) {
+	const str = String(value || '').trim();
+	const match = /^([0-9]+)([smhd])$/i.exec(str);
+	if (!match) return undefined;
+	const amount = Number(match[1]);
+	if (Number.isNaN(amount)) return undefined;
+	switch (match[2].toLowerCase()) {
+		case 'd': return amount * 24 * 60 * 60 * 1000;
+		case 'h': return amount * 60 * 60 * 1000;
+		case 'm': return amount * 60 * 1000;
+		case 's': return amount * 1000;
+		default: return undefined;
+	}
+}
+
+function parsePagination(query) {
+	const pageParam = query.page;
+	const limitParam = query.limit;
+	if (pageParam === undefined && limitParam === undefined) return null;
+
+	const page = pageParam !== undefined ? Number(pageParam) : 1;
+	const limit = limitParam !== undefined ? Number(limitParam) : 20;
+	if (!Number.isInteger(page) || page < 1 || !Number.isInteger(limit) || limit < 1 || limit > 100) {
+		return { error: 'page و limit باید اعداد صحیح مثبت باشند و limit نباید بیشتر از 100 باشد.' };
+	}
+	return { skip: (page - 1) * limit, take: limit, page, limit };
 }
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
@@ -39,13 +97,10 @@ export async function login(req, res, next) {
 			return res.status(400).json({ error: "ورودی نامعتبر است" });
 		}
 
-		const admin = await prisma.admin.findUnique({ where: { username: username.trim() } });
-		if (!admin) {
-			return res.status(401).json({ error: "نام کاربری یا رمز اشتباه است" });
-		}
-
-		const valid = await bcrypt.compare(password, admin.password);
-		if (!valid) {
+		const trimmedUsername = username.trim();
+		const admin = await prisma.admin.findUnique({ where: { username: trimmedUsername } });
+		const valid = await bcrypt.compare(password, admin ? admin.password : DUMMY_PASSWORD_HASH);
+		if (!valid || !admin) {
 			return res.status(401).json({ error: "نام کاربری یا رمز اشتباه است" });
 		}
 
@@ -55,7 +110,38 @@ export async function login(req, res, next) {
 			{ expiresIn: JWT_EXPIRES_IN }
 		);
 
-		res.json({ token });
+		// Set HttpOnly cookie for the admin token. Client-side JS cannot read
+		// this cookie, preventing token theft via XSS. Also return a small
+		// non-sensitive success payload for the UI.
+		const secure = process.env.NODE_ENV === 'production';
+		// Calculate maxAge from JWT_EXPIRES_IN when possible.
+		const maxAge = parseDurationToMs(JWT_EXPIRES_IN);
+
+		res.cookie('roof_admin_token', token, {
+			httpOnly: true,
+			secure,
+			sameSite: 'lax',
+			...(maxAge ? { maxAge } : {}),
+		});
+
+		res.json({ success: true });
+	} catch (err) {
+		next(err);
+	}
+}
+
+export async function logout(req, res, next) {
+	try {
+		// Clear the cookie on logout. Use same options as when setting.
+		const secure = process.env.NODE_ENV === 'production';
+		res.clearCookie('roof_admin_token', { httpOnly: true, secure, sameSite: 'lax' });
+		res.json({ success: true });
+	} catch (err) { next(err); }
+}
+
+export async function getCurrentAdmin(req, res, next) {
+	try {
+		res.json({ id: req.admin?.id ?? null, username: req.admin?.username ?? null, role: req.admin?.role ?? null });
 	} catch (err) {
 		next(err);
 	}
@@ -64,16 +150,27 @@ export async function login(req, res, next) {
 // ─── Admins (management) ───────────────────────────────────────────────────
 
 async function ensureRequesterIsMain(req) {
-	const requesterId = req.admin && req.admin.id;
-	if (!requesterId) return null;
-	const requester = await prisma.admin.findUnique({ where: { id: requesterId } });
-	return requester && requester.role === 'MAIN';
+	return req.admin?.role === 'MAIN';
 }
 
 export async function getAdmins(req, res, next) {
 	try {
-		const admins = await prisma.admin.findMany({ select: { id: true, username: true, firstName: true, lastName: true, createdAt: true, role: true }, orderBy: { id: 'asc' } });
-		res.json(admins);
+		const pagination = parsePagination(req.query);
+		if (pagination && pagination.error) {
+			return res.status(400).json({ error: pagination.error });
+		}
+
+		if (!pagination) {
+			const admins = await prisma.admin.findMany({ select: { id: true, username: true, firstName: true, lastName: true, createdAt: true, role: true }, orderBy: { id: 'asc' } });
+			return res.json(admins);
+		}
+
+		const [admins, total] = await prisma.$transaction([
+			prisma.admin.findMany({ select: { id: true, username: true, firstName: true, lastName: true, createdAt: true, role: true }, orderBy: { id: 'asc' }, skip: pagination.skip, take: pagination.take }),
+			prisma.admin.count(),
+		]);
+
+		res.json({ data: admins, page: pagination.page, limit: pagination.limit, total });
 	} catch (err) {
 		next(err);
 	}
@@ -110,7 +207,13 @@ export async function updateAdmin(req, res, next) {
 
 		const { username, password, firstName, lastName, role } = req.body || {};
 		const data = {};
-		if (username !== undefined) data.username = String(username).trim();
+		if (username !== undefined) {
+			const trimmed = String(username).trim();
+			if (!trimmed) return res.status(400).json({ error: 'نام کاربری الزامی است' });
+			const existing = await prisma.admin.findUnique({ where: { username: trimmed } });
+			if (existing && existing.id !== id) return res.status(409).json({ error: 'نام کاربری قبلاً ثبت شده' });
+			data.username = trimmed;
+		}
 		if (firstName !== undefined) data.firstName = String(firstName).trim() || 'admin';
 		if (lastName !== undefined) data.lastName = String(lastName).trim() || 'admin';
 		if (role !== undefined) {
@@ -119,6 +222,16 @@ export async function updateAdmin(req, res, next) {
 		if (password !== undefined) {
 			if (typeof password !== 'string' || password.length < 4) return res.status(400).json({ error: 'رمز عبور نامعتبر است' });
 			data.password = await bcrypt.hash(password, 10);
+		}
+		// Prevent removing the last MAIN admin by demoting them to SECONDARY.
+		if (data.role === 'SECONDARY') {
+			const target = await prisma.admin.findUnique({ where: { id } });
+			if (target && target.role === 'MAIN') {
+				const mainCount = await prisma.admin.count({ where: { role: 'MAIN' } });
+				if (mainCount <= 1) {
+					return res.status(400).json({ error: 'حداقل باید یک ادمین با نقش MAIN وجود داشته باشد. عملیات انجام نشد.' });
+				}
+			}
 		}
 
 		const updated = await prisma.admin.update({ where: { id }, data });
@@ -150,10 +263,26 @@ export async function deleteAdmin(req, res, next) {
 
 export async function getAllReviews(req, res, next) {
 	try {
-		const reviews = await prisma.review.findMany({
-			orderBy: { createdAt: "desc" },
-		});
-		res.json(reviews);
+		const pagination = parsePagination(req.query);
+		if (pagination && pagination.error) {
+			return res.status(400).json({ error: pagination.error });
+		}
+
+		if (!pagination) {
+			const reviews = await prisma.review.findMany({ orderBy: { createdAt: "desc" } });
+			return res.json(reviews);
+		}
+
+		const [reviews, total] = await prisma.$transaction([
+			prisma.review.findMany({
+				orderBy: { createdAt: "desc" },
+				skip: pagination.skip,
+				take: pagination.take,
+			}),
+			prisma.review.count(),
+		]);
+
+		res.json({ data: reviews, page: pagination.page, limit: pagination.limit, total });
 	} catch (err) {
 		next(err);
 	}
@@ -182,6 +311,7 @@ export async function updateReview(req, res, next) {
 			data: {
 				...(visible !== undefined && { visible }),
 				...(reply !== undefined && { reply }),
+				updatedById: req.admin?.id,
 			},
 		});
 
@@ -208,16 +338,32 @@ export async function deleteReview(req, res, next) {
 
 export async function getAdminProducts(req, res, next) {
 	try {
-		const products = await prisma.product.findMany({ orderBy: { id: "asc" } });
-		res.json(products);
+		const pagination = parsePagination(req.query);
+		if (pagination && pagination.error) {
+			return res.status(400).json({ error: pagination.error });
+		}
+
+		if (!pagination) {
+			const products = await prisma.product.findMany({ orderBy: { id: "asc" } });
+			return res.json(products);
+		}
+
+		const [products, total] = await prisma.$transaction([
+			prisma.product.findMany({ orderBy: { id: "asc" }, skip: pagination.skip, take: pagination.take }),
+			prisma.product.count(),
+		]);
+
+		res.json({ data: products, page: pagination.page, limit: pagination.limit, total });
 	} catch (err) {
 		next(err);
 	}
 }
 
 export async function createProduct(req, res, next) {
+	let imageFilename;
 	try {
 		const { name, price, description, image, categoryId } = req.body;
+		imageFilename = image;
 
 		if (typeof name !== "string" || !name.trim()) {
 			return res.status(400).json({ error: "نام محصول الزامی است" });
@@ -235,6 +381,11 @@ export async function createProduct(req, res, next) {
 			return res.status(400).json({ error: "نام فایل تصویر نامعتبر است" });
 		}
 
+		const category = await prisma.category.findUnique({ where: { id: Number(categoryId) } });
+		if (!category) {
+			return res.status(404).json({ error: "دسته‌بندی پیدا نشد" });
+		}
+
 		const product = await prisma.product.create({
 			data: {
 				name: name.trim(),
@@ -242,16 +393,22 @@ export async function createProduct(req, res, next) {
 				description: description || "",
 				image:       image || "placeholder.png",
 				categoryId: Number(categoryId),
+				createdById: req.admin?.id,
+				updatedById: req.admin?.id,
 			},
 		});
 
 		res.status(201).json(product);
 	} catch (err) {
+		if (isTempUpload(imageFilename)) {
+			await cleanupTempUpload(imageFilename);
+		}
 		next(err);
 	}
 }
 
 export async function updateProduct(req, res, next) {
+	let existing;
 	try {
 		const id = Number(req.params.id);
 		if (!Number.isInteger(id) || id < 1) {
@@ -275,27 +432,48 @@ export async function updateProduct(req, res, next) {
 			return res.status(400).json({ error: "شناسه دسته‌بندی نامعتبر است" });
 		}
 
-		// fetch existing product to determine if we should remove its file
-		const existing = await prisma.product.findUnique({ where: { id } });
-
-		// If image is provided and different from existing, remove old file when appropriate
-		if (image !== undefined && existing && existing.image && image !== existing.image) {
-			await tryUnlink(existing.image);
+		existing = await prisma.product.findUnique({ where: { id } });
+		if (!existing) {
+			return res.status(404).json({ error: "محصول یافت نشد" });
 		}
 
+		if (categoryId !== undefined) {
+			const category = await prisma.category.findUnique({ where: { id: Number(categoryId) } });
+			if (!category) {
+				return res.status(404).json({ error: "دسته‌بندی پیدا نشد" });
+			}
+		}
+
+		const shouldUnlink = image !== undefined && existing.image && image !== existing.image && existing.image !== 'placeholder.png';
 		const product = await prisma.product.update({
 			where: { id },
 			data: {
-				...(name        !== undefined && { name }),
+				...(name        !== undefined && { name: name.trim() }),
 				...(price       !== undefined && { price: Number(price) }),
 				...(description !== undefined && { description }),
 				...(image       !== undefined && { image }),
 				...(categoryId  !== undefined && { categoryId: Number(categoryId) }),
+				updatedById: req.admin?.id,
 			},
 		});
 
+		if (shouldUnlink) {
+			await tryUnlink(existing.image);
+		}
+
 		res.json(product);
 	} catch (err) {
+		try {
+			// Only cleanup temp upload if it's a temp file and differs
+			// from the already-existing product image (to avoid deleting
+			// the product's current persistent image when no change was intended).
+			if (isTempUpload(req.body?.image) && (!existing || req.body.image !== existing.image)) {
+				await cleanupTempUpload(req.body.image);
+			}
+		} catch (cleanupErr) {
+			// swallow cleanup errors but keep original error flowing
+			console.error('Failed to cleanup temp upload during updateProduct catch:', cleanupErr);
+		}
 		next(err);
 	}
 }
@@ -307,11 +485,15 @@ export async function deleteProduct(req, res, next) {
 			return res.status(400).json({ error: "شناسه نامعتبر است" });
 		}
 		const existing = await prisma.product.findUnique({ where: { id } });
-		if (existing && existing.image) {
-			await tryUnlink(existing.image);
+		if (!existing) {
+			return res.status(404).json({ error: "محصول یافت نشد" });
 		}
 
 		await prisma.product.delete({ where: { id } });
+		if (existing.image && existing.image !== 'placeholder.png') {
+			await tryUnlink(existing.image);
+		}
+
 		res.json({ success: true });
 	} catch (err) {
 		next(err);
@@ -322,8 +504,22 @@ export async function deleteProduct(req, res, next) {
 
 export async function getAdminCategories(req, res, next) {
 	try {
-		const categories = await prisma.category.findMany({ orderBy: { id: "asc" } });
-		res.json(categories);
+		const pagination = parsePagination(req.query);
+		if (pagination && pagination.error) {
+			return res.status(400).json({ error: pagination.error });
+		}
+
+		if (!pagination) {
+			const categories = await prisma.category.findMany({ orderBy: { id: "asc" } });
+			return res.json(categories);
+		}
+
+		const [categories, total] = await prisma.$transaction([
+			prisma.category.findMany({ orderBy: { id: "asc" }, skip: pagination.skip, take: pagination.take }),
+			prisma.category.count(),
+		]);
+
+		res.json({ data: categories, page: pagination.page, limit: pagination.limit, total });
 	} catch (err) {
 		next(err);
 	}
@@ -348,14 +544,14 @@ export async function createCategory(req, res, next) {
 		// Try create; if a P2002 unique constraint on `id` happens (sequence out-of-sync),
 		// attempt to re-sync the Postgres sequence and retry once.
 		try {
-			const category = await prisma.category.create({ data: { name, type } });
+			const category = await prisma.category.create({ data: { name, type, createdById: req.admin?.id, updatedById: req.admin?.id } });
 			res.status(201).json(category);
 			return;
 		} catch (createErr) {
 			if (createErr && createErr.code === 'P2002' && createErr.meta && Array.isArray(createErr.meta.target) && createErr.meta.target.includes('id')) {
 				// Re-sync serial sequence to max(id) and retry
 				await prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('categories','id'), (SELECT COALESCE(MAX(id), 1) FROM categories))`;
-				const category = await prisma.category.create({ data: { name, type } });
+				const category = await prisma.category.create({ data: { name, type, createdById: req.admin?.id, updatedById: req.admin?.id } });
 				res.status(201).json(category);
 				return;
 			}
@@ -391,6 +587,7 @@ export async function updateCategory(req, res, next) {
 			data: {
 				...(name && { name }),
 				...(type && { type }),
+				updatedById: req.admin?.id,
 			},
 		});
 
@@ -406,8 +603,26 @@ export async function deleteCategory(req, res, next) {
 		if (!Number.isInteger(id) || id < 1) {
 			return res.status(400).json({ error: "شناسه نامعتبر است" });
 		}
-		await prisma.category.delete({ where: { id } });
-		res.json({ success: true });
+
+		const category = await prisma.category.findUnique({ where: { id } });
+		if (!category) {
+			return res.status(404).json({ error: "دسته‌بندی پیدا نشد" });
+		}
+
+		const productCount = await prisma.product.count({ where: { categoryId: id } });
+		if (productCount > 0) {
+			return res.status(400).json({ error: "ابتدا محصولات این دسته را حذف یا منتقل کنید." });
+		}
+
+		try {
+			await prisma.category.delete({ where: { id } });
+			res.json({ success: true });
+		} catch (deleteErr) {
+			if (deleteErr && deleteErr.code === 'P2014') {
+				return res.status(400).json({ error: "ابتدا محصولات این دسته را حذف یا منتقل کنید." });
+			}
+			throw deleteErr;
+		}
 	} catch (err) {
 		next(err);
 	}
@@ -416,11 +631,15 @@ export async function deleteCategory(req, res, next) {
 // ─── Upload Image ───────────────────────────────────────────────────────
 export async function uploadImage(req, res, next) {
 	try {
+		await cleanupStaleTempUploads();
 		if (!req.file) {
 			return res.status(400).json({ error: "فایلی ارسال نشد" });
 		}
 		res.json({ filename: req.file.filename });
 	} catch (err) {
+		if (req.file?.filename) {
+			await cleanupTempUpload(req.file.filename);
+		}
 		next(err);
 	}
 }

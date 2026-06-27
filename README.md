@@ -3,7 +3,7 @@
 This repository contains a static frontend, a Node/Express backend, and an admin panel.
 
 ## Running the backend
-Run the development server from the `server` directory:
+Run the development server from the `server` directory. Everything is served by the single Express server:
 
 ```bash
 cd server
@@ -12,22 +12,10 @@ npm run db:push
 npm run dev
 ```
 
-## Running the frontend (client)
-Serve the static site from the `public` directory:
+This serves the client pages at `http://localhost:4000/`, the admin panel at `http://admin.localhost:4000/` when `ADMIN_HOST=admin.localhost` is set, and the API at `http://localhost:4000/api`.
 
-```bash
-npx http-server . -p 3000
-```
+> Note: when `ADMIN_HOST` is enabled, the admin UI is only available through that hostname, not via `/admin`.
 
-Note: Use `localhost` (not `127.0.0.1`) for local development.
-
-## Admin panel
-Run the admin panel from the `server` directory:
-
-```bash
-cd server
-npm run admin:dev
-```
 
 To create the initial admin account, run:
 
@@ -39,6 +27,7 @@ npm run db:seed
 See [server/.env.example](server/.env.example) for sample environment variables. Create a local copy for development:
 
 ```bash
+# on MacOS
 cp server/.env.example server/.env
 # on Windows
 copy server\.env.example server\.env

@@ -21,7 +21,7 @@ const storage = multer.diskStorage({
     };
     const ext = EXT_MAP[file.mimetype] || ".jpg";
     const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `${unique}${ext}`);
+    cb(null, `temp-${unique}${ext}`);
   },
 });
 
@@ -30,7 +30,11 @@ const fileFilter = (_req, file, cb) => {
   if (allowed.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error("فقط فایل‌های تصویری مجاز است (jpg, png, webp, gif)"));
+    // Provide a client-friendly HTTP status so the error handler can
+    // return a 400 instead of a generic 500.
+    const err = new Error("فقط فایل‌های تصویری مجاز است (jpg, png, webp, gif)");
+    err.status = 400;
+    cb(err);
   }
 };
 

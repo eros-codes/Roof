@@ -44,7 +44,8 @@ function initCounters() {
 			entries.forEach((entry) => {
 				if (!entry.isIntersecting) return;
 				const el = entry.target;
-				const target = parseInt(el.dataset.count, 10);
+				let target = parseInt(el.dataset.count, 10);
+				if (!Number.isFinite(target) || target < 0) target = 0;
 				const t0 = performance.now();
 				const dur = 1500;
 				const tick = (now) => {
@@ -67,14 +68,26 @@ function initCounters() {
 function initParallax() {
 	const bg = document.querySelector(".s-hero__bg");
 	if (!bg) return;
-	const update = () => {
-		// only run while hero is in view
+	let ticking = false;
+	let lastY = 0;
+
+	function doUpdate() {
 		const heroH = bg.parentElement?.offsetHeight || 0;
-		if (window.scrollY < heroH) {
-			bg.style.transform = `translateY(${window.scrollY * 0.28}px)`;
+		if (lastY < heroH) {
+			bg.style.transform = `translateY(${lastY * 0.28}px)`;
+		}
+		ticking = false;
+	}
+
+	const onScroll = () => {
+		lastY = window.scrollY;
+		if (!ticking) {
+			ticking = true;
+			requestAnimationFrame(doUpdate);
 		}
 	};
-	window.addEventListener("scroll", update, { passive: true });
+
+	window.addEventListener("scroll", onScroll, { passive: true });
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
