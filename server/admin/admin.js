@@ -1,8 +1,9 @@
 import * as api from './assets/js/api.js';
 import { initTheme, closeModal } from './assets/js/ui.js';
 import { state } from './assets/js/state.js';
+import { escapeHtml } from './assets/js/helpers.js';
 import { loadReviews, renderReviews } from './assets/js/reviews.js';
-import { loadUsers, renderUsers } from './assets/js/users.js';
+import { loadUsers, renderUsers, invalidateCurrentAdminCache } from './assets/js/users.js';
 import { loadProducts, renderProducts } from './assets/js/products.js';
 import { loadCategories, renderCategories } from './assets/js/categories.js';
 
@@ -31,11 +32,12 @@ async function loadSection(section) {
 			await Promise.all([loadCategories(), loadProducts()]);
 			renderCategories();
 		} else if (section === 'users') {
+			invalidateCurrentAdminCache();
 			await loadUsers();
 			await renderUsers();
 		}
-		} catch (err) {
-		el.innerHTML = `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p class="empty-title">خطا در بارگذاری</p><p class="empty-sub">${err.message}</p></div>`;
+	} catch (err) {
+		el.innerHTML = `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p class="empty-title">خطا در بارگذاری</p><p class="empty-sub">${escapeHtml(err.message)}</p></div>`;
 	}
 }
 

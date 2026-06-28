@@ -103,6 +103,14 @@ export async function uploadImage(file) {
   });
 
   const data = await res.json().catch(() => ({}));
+  if (res.status === 401) {
+    token.remove();
+    try { localStorage.setItem('roof_session_expired', '1'); } catch (ignored) {
+      // ignore localStorage errors
+    }
+    window.location.href = 'index.html';
+    throw new Error('Unauthorized');
+  }
   if (!res.ok) throw new Error(data.error || `خطای ${res.status}`);
   return data; // expected { filename }
 }

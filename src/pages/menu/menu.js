@@ -110,12 +110,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 			try { updateTypeIndicatorToSelected(); } catch (e) {}
 			if (selectedId != null) {
 				const prods = await getProductsByCategory(selectedId);
-				renderProducts(prods);
+				if (prods === null) {
+					menuMain.textContent = 'خطا در ارتباط با سرور. لطفاً بعداً تلاش کنید.';
+				} else {
+					renderProducts(prods);
+				}
 			} else {
 				renderProducts([]);
 			}
 		});
-	}
+}
 	if (bfCats) {
 		bfCats.addEventListener("click", async () => {
 			if (getCurrentMenu() === "breakfast") return;
@@ -126,15 +130,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 			try { updateTypeIndicatorToSelected(); } catch (e) {}
 			if (selectedId != null) {
 				const prods = await getProductsByCategory(selectedId);
-				renderProducts(prods);
+				if (prods === null) {
+					menuMain.textContent = 'خطا در ارتباط با سرور. لطفاً بعداً تلاش کنید.';
+				} else {
+					renderProducts(prods);
+				}
 			} else {
 				renderProducts([]);
 			}
-
-		})
+		});
 	}
 
-	// Handle category selection and product rendering
 	if (categoriesContainer && menuMain) {
 		categoriesContainer.addEventListener("click", async (e) => {
 			const li = e.target.closest("li");

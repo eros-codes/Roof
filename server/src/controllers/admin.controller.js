@@ -2,6 +2,7 @@ import prisma from "../lib/prisma.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET, JWT_EXPIRES_IN } from "../config/env.js";
+import { parsePagination } from "../lib/pagination.js";
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -63,19 +64,6 @@ function parseDurationToMs(value) {
 		case 's': return amount * 1000;
 		default: return undefined;
 	}
-}
-
-function parsePagination(query) {
-	const pageParam = query.page;
-	const limitParam = query.limit;
-	if (pageParam === undefined && limitParam === undefined) return null;
-
-	const page = pageParam !== undefined ? Number(pageParam) : 1;
-	const limit = limitParam !== undefined ? Number(limitParam) : 20;
-	if (!Number.isInteger(page) || page < 1 || !Number.isInteger(limit) || limit < 1 || limit > 100) {
-		return { error: 'page و limit باید اعداد صحیح مثبت باشند و limit نباید بیشتر از 100 باشد.' };
-	}
-	return { skip: (page - 1) * limit, take: limit, page, limit };
 }
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
@@ -183,7 +171,7 @@ export async function createAdmin(req, res, next) {
 
 		let { username, password, firstName, lastName, role } = req.body || {};
 		if (typeof username !== 'string' || !username.trim()) return res.status(400).json({ error: 'نام کاربری الزامی است' });
-		if (typeof password !== 'string' || password.length < 4) return res.status(400).json({ error: 'رمز عبور نامعتبر است' });
+		if (typeof password !== 'string' || password.length < 8) return res.status(400).json({ error: 'رمز عبور باید حداقل ۸ کاراکتر باشد' });
 		firstName = typeof firstName === 'string' && firstName.trim() ? firstName.trim() : 'admin';
 		lastName = typeof lastName === 'string' && lastName.trim() ? lastName.trim() : 'admin';
 		const VALID = ['MAIN', 'SECONDARY'];
@@ -220,21 +208,25 @@ export async function updateAdmin(req, res, next) {
 			const VALID = ['MAIN', 'SECONDARY']; if (!VALID.includes(role)) return res.status(400).json({ error: 'نقش نامعتبر است' }); data.role = role;
 		}
 		if (password !== undefined) {
-			if (typeof password !== 'string' || password.length < 4) return res.status(400).json({ error: 'رمز عبور نامعتبر است' });
+			if (typeof password !== 'string' || password.length < 8) return res.status(400).json({ error: 'رمز عبور باید حداقل ۸ کاراکتر باشد' });
 			data.password = await bcrypt.hash(password, 10);
 		}
-		// Prevent removing the last MAIN admin by demoting them to SECONDARY.
-		if (data.role === 'SECONDARY') {
-			const target = await prisma.admin.findUnique({ where: { id } });
-			if (target && target.role === 'MAIN') {
-				const mainCount = await prisma.admin.count({ where: { role: 'MAIN' } });
-				if (mainCount <= 1) {
-					return res.status(400).json({ error: 'حداقل باید یک ادمین با نقش MAIN وجود داشته باشد. عملیات انجام نشد.' });
+
+		// Wrap in transaction with Serializable isolation to prevent race conditions
+		const updated = await prisma.$transaction(async (tx) => {
+			// Prevent removing the last MAIN admin by demoting them to SECONDARY.
+			if (data.role === 'SECONDARY') {
+				const target = await tx.admin.findUnique({ where: { id } });
+				if (target && target.role === 'MAIN') {
+					const mainCount = await tx.admin.count({ where: { role: 'MAIN' } });
+					if (mainCount <= 1) {
+						throw Object.assign(new Error('حداقل باید یک ادمین با نقش MAIN وجود داشته باشد. عملیات انجام نشد.'), { status: 400 });
+					}
 				}
 			}
-		}
+			return tx.admin.update({ where: { id }, data });
+		}, { isolationLevel: 'Serializable' });
 
-		const updated = await prisma.admin.update({ where: { id }, data });
 		res.json({ id: updated.id, username: updated.username, firstName: updated.firstName, lastName: updated.lastName, createdAt: updated.createdAt, role: updated.role });
 	} catch (err) { next(err); }
 }
@@ -245,16 +237,21 @@ export async function deleteAdmin(req, res, next) {
 		if (!isMain) return res.status(403).json({ error: 'دسترسی کافی نیست' });
 		const id = Number(req.params.id);
 		if (!Number.isInteger(id) || id < 1) return res.status(400).json({ error: 'شناسه نامعتبر است' });
-		// ensure we don't delete the last MAIN admin
-		const target = await prisma.admin.findUnique({ where: { id } });
-		if (!target) return res.status(404).json({ error: 'ادمین یافت نشد' });
-		if (target.role === 'MAIN') {
-			const mainCount = await prisma.admin.count({ where: { role: 'MAIN' } });
-			if (mainCount <= 1) {
-				return res.status(400).json({ error: 'حداقل باید یک ادمین با نقش MAIN وجود داشته باشد. حذف انجام نشد.' });
+		
+		// Wrap in transaction with Serializable isolation to prevent race conditions
+		await prisma.$transaction(async (tx) => {
+			const target = await tx.admin.findUnique({ where: { id } });
+			if (!target) throw Object.assign(new Error('ادمین یافت نشد'), { status: 404 });
+			// ensure we don't delete the last MAIN admin
+			if (target.role === 'MAIN') {
+				const mainCount = await tx.admin.count({ where: { role: 'MAIN' } });
+				if (mainCount <= 1) {
+					throw Object.assign(new Error('حداقل باید یک ادمین با نقش MAIN وجود داشته باشد. حذف انجام نشد.'), { status: 400 });
+				}
 			}
-		}
-		await prisma.admin.delete({ where: { id } });
+			await tx.admin.delete({ where: { id } });
+		}, { isolationLevel: 'Serializable' });
+		
 		res.json({ success: true });
 	} catch (err) { next(err); }
 }
@@ -306,6 +303,11 @@ export async function updateReview(req, res, next) {
 			return res.status(400).json({ error: "پاسخ حداکثر ۵۰۰ کاراکتر است" });
 		}
 
+		const existingReview = await prisma.review.findUnique({ where: { id } });
+		if (!existingReview) {
+			return res.status(404).json({ error: "نظر یافت نشد" });
+		}
+
 		const review = await prisma.review.update({
 			where: { id },
 			data: {
@@ -326,6 +328,10 @@ export async function deleteReview(req, res, next) {
 		const id = Number(req.params.id);
 		if (!Number.isInteger(id) || id < 1) {
 			return res.status(400).json({ error: "شناسه نامعتبر است" });
+		}
+		const existingReview = await prisma.review.findUnique({ where: { id } });
+		if (!existingReview) {
+			return res.status(404).json({ error: "نظر یافت نشد" });
 		}
 		await prisma.review.delete({ where: { id } });
 		res.json({ success: true });
@@ -368,8 +374,8 @@ export async function createProduct(req, res, next) {
 		if (typeof name !== "string" || !name.trim()) {
 			return res.status(400).json({ error: "نام محصول الزامی است" });
 		}
-		if (Number.isNaN(Number(price)) || Number(price) < 0) {
-			return res.status(400).json({ error: "قیمت نامعتبر است" });
+		if (!Number.isInteger(Number(price)) || Number(price) < 0) {
+			return res.status(400).json({ error: "قیمت باید عدد صحیح باشد" });
 		}
 		if (categoryId === undefined || Number.isNaN(Number(categoryId)) || Number(categoryId) < 1) {
 			return res.status(400).json({ error: "شناسه دسته‌بندی نامعتبر است" });
@@ -419,8 +425,8 @@ export async function updateProduct(req, res, next) {
 		if (name !== undefined && typeof name !== "string") {
 			return res.status(400).json({ error: "نام محصول نامعتبر است" });
 		}
-		if (price !== undefined && Number.isNaN(Number(price))) {
-			return res.status(400).json({ error: "قیمت نامعتبر است" });
+		if (price !== undefined && (!Number.isInteger(Number(price)) || Number(price) < 0)) {
+			return res.status(400).json({ error: "قیمت باید عدد صحیح باشد" });
 		}
 		if (description !== undefined && description !== null && typeof description !== "string") {
 			return res.status(400).json({ error: "توضیحات نامعتبر است" });
@@ -582,6 +588,11 @@ export async function updateCategory(req, res, next) {
 			return res.status(400).json({ error: "نوع دسته‌بندی نامعتبر است" });
 		}
 
+		const existingCategory = await prisma.category.findUnique({ where: { id } });
+		if (!existingCategory) {
+			return res.status(404).json({ error: "دسته‌بندی پیدا نشد" });
+		}
+
 		const category = await prisma.category.update({
 			where: { id },
 			data: {
@@ -609,20 +620,17 @@ export async function deleteCategory(req, res, next) {
 			return res.status(404).json({ error: "دسته‌بندی پیدا نشد" });
 		}
 
-		const productCount = await prisma.product.count({ where: { categoryId: id } });
-		if (productCount > 0) {
-			return res.status(400).json({ error: "ابتدا محصولات این دسته را حذف یا منتقل کنید." });
-		}
+		const products = await prisma.product.findMany({ where: { categoryId: id } });
 
-		try {
-			await prisma.category.delete({ where: { id } });
-			res.json({ success: true });
-		} catch (deleteErr) {
-			if (deleteErr && deleteErr.code === 'P2014') {
-				return res.status(400).json({ error: "ابتدا محصولات این دسته را حذف یا منتقل کنید." });
-			}
-			throw deleteErr;
-		}
+		await prisma.category.delete({ where: { id } });
+
+		await Promise.all(
+			products
+				.filter((p) => p.image && p.image !== 'placeholder.png')
+				.map((p) => tryUnlink(p.image))
+		);
+
+		res.json({ success: true, deletedProducts: products.length });
 	} catch (err) {
 		next(err);
 	}

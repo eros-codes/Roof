@@ -84,7 +84,6 @@ export function renderProducts() {
     const actionsDiv = document.createElement('div');
     actionsDiv.className = 'product-actions';
 
-    card.innerHTML = '';
     card.appendChild(imgWrap);
     card.appendChild(body);
     card.appendChild(actionsDiv);
@@ -173,6 +172,6 @@ export async function deleteProduct(id) {
     toast('محصول حذف شد', 'success');
     renderProducts();
   } catch (e) {
-    toast(e.message, 'error');
+    toast(e.message || 'خطا در حذف محصول', 'error');
   }
 }

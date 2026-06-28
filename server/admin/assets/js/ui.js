@@ -1,3 +1,5 @@
+import { escapeHtml } from './helpers.js';
+
 export const ICONS = {
   success: `<svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
   error: `<svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
@@ -12,7 +14,7 @@ const ICON_MOON = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" s
 export function toast(msg, type = 'info') {
   const el = document.createElement('div');
   el.className = `toast toast--${type}`;
-  el.innerHTML = `${ICONS[type] || ICONS.info}${msg}`;
+  el.innerHTML = `${ICONS[type] || ICONS.info}<span>${escapeHtml(msg)}</span>`;
   document.getElementById('toast-container').appendChild(el);
   setTimeout(() => {
     el.classList.add('out');
@@ -20,8 +22,16 @@ export function toast(msg, type = 'info') {
   }, 3200);
 }
 
+let confirmPending = null;
+
 export function confirm(msg, title = 'تأیید عملیات') {
+  if (confirmPending) {
+    const old = confirmPending;
+    confirmPending = null;
+    old(false);
+  }
   return new Promise((resolve) => {
+    confirmPending = resolve;
     const backdrop = document.getElementById('confirm-backdrop');
     document.getElementById('confirm-title').textContent = title;
     document.getElementById('confirm-msg').textContent = msg;
@@ -34,6 +44,7 @@ export function confirm(msg, title = 'تأیید عملیات') {
       backdrop.hidden = true;
       yes.replaceWith(yes.cloneNode(true));
       no.replaceWith(no.cloneNode(true));
+      confirmPending = null;
       resolve(result);
     }
 
@@ -85,7 +96,7 @@ export function openModal(opts) {
       } else if (input && input.type === 'password') {
         // if the modal is for creating a new entity (title or submitText contains keywords), suggest new-password
         const ctx = String((title || '') + ' ' + (submitText || '')).trim();
-        const isNew = /جدید|ثبت|افزودن|جدید/i.test(ctx);
+        const isNew = /جدید|ثبت|افزودن|ساخت/i.test(ctx);
         input.setAttribute('autocomplete', isNew ? 'new-password' : 'current-password');
       } else if (f.name === 'username' || (f.name && String(f.name).toLowerCase().includes('user'))) {
         input.setAttribute('autocomplete', 'username');
@@ -105,6 +116,7 @@ export function openModal(opts) {
     }
     input.id = `mf-${f.name}`; input.name = f.name;
     if (!f.optional && f.type !== 'select') input.required = true;
+    if (f.minlength) input.minLength = f.minlength;
     if (initialValues[f.name] !== undefined) {
       if (f.type === 'select') input.value = String(initialValues[f.name]); else input.value = initialValues[f.name] ?? '';
     }
@@ -123,7 +135,7 @@ export function openModal(opts) {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(form));
     submitBtn.disabled = true; submitBtn.innerHTML = `<span class="btn-spinner"></span>`;
-    try { await onSubmit(data); closeModal(); } catch (err) { toast(err.message, 'error'); submitBtn.disabled = false; submitBtn.innerHTML = `<span class="btn-text">${submitText}</span>`; }
+    try { await onSubmit(data); closeModal(); } catch (err) { toast(err.message || 'خطایی رخ داد', 'error'); submitBtn.disabled = false; submitBtn.innerHTML = `<span class="btn-text">${submitText}</span>`; }
   };
   document.getElementById('modal-backdrop').hidden = false;
 }

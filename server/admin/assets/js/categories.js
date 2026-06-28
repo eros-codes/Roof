@@ -73,18 +73,18 @@ export function editCategory(c) {
 }
 
 export async function deleteCategory(id, count) {
-  if (count > 0) {
-    const ok = await confirm(`این دسته‌بندی ${count} محصول دارد. با حذف آن ممکن است محصولات بدون دسته بمانند. ادامه می‌دهید؟`, 'حذف دسته‌بندی');
-    if (!ok) return;
-  } else {
-    const ok = await confirm('این دسته‌بندی حذف می‌شود. مطمئنید؟', 'حذف دسته‌بندی'); if (!ok) return;
-  }
+  const message = count > 0
+    ? `این دسته‌بندی و تمام ${count} محصول داخلش برای همیشه حذف خواهند شد. مطمئنید?`
+    : 'این دسته‌بندی حذف میشود. مطمئنید?';
+  const ok = await confirm(message, 'حذف دسته‌بندی');
+  if (!ok) return;
   try {
     await api.categories.delete(id);
     state.categories = state.categories.filter((item) => item.id !== id);
+    state.products = state.products.filter((p) => p.categoryId !== id);
     toast('دسته‌بندی حذف شد', 'success');
     renderCategories();
   } catch (e) {
-    toast(e.message, 'error');
+    toast(e.message || 'خطا در حذف دسته‌بندی', 'error');
   }
 }

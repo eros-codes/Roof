@@ -5,6 +5,10 @@ import { state } from './state.js';
 
 let cachedCurrentAdmin = null;
 
+export function invalidateCurrentAdminCache() {
+  cachedCurrentAdmin = null;
+}
+
 async function getCurrentRole() {
   try {
     if (cachedCurrentAdmin) return cachedCurrentAdmin.role;
@@ -110,7 +114,7 @@ function openCreateAdminModal() {
       { name: 'firstName', label: 'نام', type: 'text' },
       { name: 'lastName', label: 'نام خانوادگی', type: 'text' },
       { name: 'username', label: 'نام کاربری', type: 'text' },
-      { name: 'password', label: 'رمز عبور', type: 'password' },
+      { name: 'password', label: 'رمز عبور', type: 'password', minlength: 8 },
       { name: 'role', label: 'نقش', type: 'select', options: [ { value: 'MAIN', label: 'ادمین اصلی' }, { value: 'SECONDARY', label: 'ادمین فرعی' } ] },
     ],
     submitText: 'ثبت ادمین',
@@ -133,13 +137,14 @@ function openEditAdminModal(u) {
       { name: 'firstName', label: 'نام', type: 'text' },
       { name: 'lastName', label: 'نام خانوادگی', type: 'text' },
       { name: 'username', label: 'نام کاربری', type: 'text' },
-      { name: 'password', label: 'رمز عبور (در صورت تغییر)' , type: 'password', optional: true },
+      { name: 'password', label: 'رمز عبور (در صورت تغییر)' , type: 'password', optional: true, minlength: 8 },
       { name: 'role', label: 'نقش', type: 'select', options: [ { value: 'MAIN', label: 'ادمین اصلی' }, { value: 'SECONDARY', label: 'ادمین فرعی' } ] },
     ],
     initialValues: { firstName: u.firstName, lastName: u.lastName, username: u.username, role: u.role },
     submitText: 'ذخیره',
     onSubmit: async (data) => {
-      const payload = { firstName: data.firstName || 'admin', lastName: data.lastName || 'admin', username: data.username };
+      const payload = { firstName: data.firstName || 'admin', lastName: data.lastName || 'admin' };
+      if (data.username && data.username !== u.username) payload.username = data.username;
       if (data.password) payload.password = data.password;
       if (data.role) payload.role = data.role;
       const updatedAdmin = await api.admins.update(u.id, payload);

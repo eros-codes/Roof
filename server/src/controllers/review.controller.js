@@ -1,17 +1,5 @@
 import prisma from "../lib/prisma.js";
-
-function parsePagination(query) {
-	const pageParam = query.page;
-	const limitParam = query.limit;
-	if (pageParam === undefined && limitParam === undefined) return null;
-
-	const page = pageParam !== undefined ? Number(pageParam) : 1;
-	const limit = limitParam !== undefined ? Number(limitParam) : 20;
-	if (!Number.isInteger(page) || page < 1 || !Number.isInteger(limit) || limit < 1 || limit > 100) {
-		return { error: 'page و limit باید اعداد صحیح مثبت باشند و limit نباید بیشتر از 100 باشد.' };
-	}
-	return { skip: (page - 1) * limit, take: limit, page, limit };
-}
+import { parsePagination } from "../lib/pagination.js";
 
 export async function getReviews(req, res, next) {
 	try {
@@ -23,6 +11,7 @@ export async function getReviews(req, res, next) {
 		if (!pagination) {
 			const reviews = await prisma.review.findMany({
 				where:   { visible: true },
+				select: { id: true, name: true, text: true, reply: true, createdAt: true },
 				orderBy: { createdAt: "desc" },
 			});
 			return res.json(reviews);
@@ -31,6 +20,7 @@ export async function getReviews(req, res, next) {
 		const [reviews, total] = await prisma.$transaction([
 			prisma.review.findMany({
 				where: { visible: true },
+				select: { id: true, name: true, text: true, reply: true, createdAt: true },
 				orderBy: { createdAt: "desc" },
 				skip: pagination.skip,
 				take: pagination.take,
@@ -77,7 +67,7 @@ export async function postReview(req, res, next) {
 			},
 		});
 
-		res.status(201).json(review);
+		res.status(201).json({ id: review.id, name: review.name, text: review.text, createdAt: review.createdAt });
 	} catch (err) {
 		next(err);
 	}

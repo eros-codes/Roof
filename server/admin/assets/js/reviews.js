@@ -42,7 +42,8 @@ export function renderReviews() {
   const listEl = document.createElement('div');
   listEl.className = 'reviews-list';
   list.forEach((r) => {
-    const initials = r.name ? String(r.name).trim()[0] : '؟';
+    const trimmedName = r.name ? String(r.name).trim() : '';
+    const initials = trimmedName ? trimmedName[0] : '؟';
     const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleDateString('fa-IR') : '—';
     const card = document.createElement('div');
     card.className = `review-card review-card--${r.visible ? 'approved' : 'pending'}`;

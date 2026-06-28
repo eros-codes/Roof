@@ -3,7 +3,7 @@ import { createExchange } from "../../../components/messages/messages.js";
 
 let reviewsCache = [];
 function getVisible() {
-	return reviewsCache.filter((r) => r.visible);
+	return reviewsCache;
 }
 const DURATION = 4000; // ms between auto-advances
 const ANIM_MS = 450;   // must match CSS animation duration
@@ -110,10 +110,10 @@ function syncPauseBtn() {
 export async function initChatPlayer() {
 	try {
 		const res = await fetchReviews();
+		// Backend returns {data, page, limit, total} when ?limit/?page is sent, or a plain array otherwise.
+		const list = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
 		// Map createdAt -> date (localized) for compatibility with createExchange
-		reviewsCache = Array.isArray(res)
-			? res.map((r) => ({ ...r, date: r.createdAt ? new Date(r.createdAt).toLocaleDateString("fa-IR") : null }))
-			: [];
+		reviewsCache = list.map((r) => ({ ...r, date: r.createdAt ? new Date(r.createdAt).toLocaleDateString("fa-IR") : null }));
 	} catch (e) {
 		console.error("Failed to load reviews:", e);
 		reviewsCache = [];

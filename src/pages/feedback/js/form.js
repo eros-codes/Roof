@@ -82,8 +82,8 @@ export function initForm() {
 					await postReview({ name: entry.name, text: entry.text });
 					// successful -> continue
 				} catch (e) {
-					// if client error, drop it; otherwise keep for later
-					if (e && e.status && e.status >= 400 && e.status < 500) {
+					// if client error (but not rate limit), drop it; otherwise keep for later
+					if (e && e.status && e.status >= 400 && e.status < 500 && e.status !== 429) {
 						// don't retry bad entries
 						continue;
 					}

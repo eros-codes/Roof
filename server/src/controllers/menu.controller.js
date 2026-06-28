@@ -3,6 +3,7 @@ import prisma from "../lib/prisma.js";
 export async function getCategories(req, res, next) {
 	try {
 		const categories = await prisma.category.findMany({
+			select: { id: true, name: true, type: true },
 			orderBy: { id: "asc" },
 		});
 		res.json(categories);
@@ -27,6 +28,7 @@ export async function getProducts(req, res, next) {
 
 		const products = await prisma.product.findMany({
 			where,
+			select: { id: true, name: true, price: true, description: true, image: true, categoryId: true },
 			orderBy: { id: "asc" },
 		});
 
