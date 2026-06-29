@@ -128,8 +128,12 @@
 }
 
 .submit-btn--loading .submit-text::after {
-	content: "";
-	animation: loading-dots 1s steps(3, end) infinite;
+	content: "...";
+	display: inline-block;
+	overflow: hidden;
+	width: 0;
+	vertical-align: bottom;
+	animation: loading-dots 1s steps(4, end) infinite;
 }
 .form-feedback {
 	font-size: 0.81rem;

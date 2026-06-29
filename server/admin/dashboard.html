@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
   <title>پنل مدیریت | روف</title>
   <link rel="stylesheet" href="./assets/css/admin.css" />
 </head>
@@ -53,7 +54,7 @@
 
       <div class="sidebar-footer">
         <span id="sidebar-username" class="sidebar-username"></span>
-        <div style="display:flex;gap:.45rem;align-items:center;">
+        <div class="header-actions">
           <button id="logout-btn" class="logout-btn" title="خروج">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -77,7 +78,7 @@
   </div>
 
   <div id="modal-backdrop" class="modal-backdrop" hidden>
-    <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-body">
       <div class="modal-header">
         <h2 class="modal-title" id="modal-title"></h2>
         <button class="modal-close" id="modal-close" aria-label="بستن">
@@ -91,7 +92,7 @@
   </div>
 
   <div id="confirm-backdrop" class="modal-backdrop" hidden>
-    <div class="modal modal--sm" role="alertdialog">
+    <div class="modal modal--sm" role="alertdialog" aria-labelledby="confirm-title" aria-describedby="confirm-msg">
       <div class="modal-header">
         <h2 class="modal-title" id="confirm-title">تأیید عملیات</h2>
       </div>
@@ -105,7 +106,7 @@
     </div>
   </div>
 
-  <div id="toast-container" class="toast-container"></div>
+  <div id="toast-container" class="toast-container" aria-live="polite" role="status"></div>
 
   <script type="module" src="./admin.js"></script>
 </body>

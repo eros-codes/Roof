@@ -7,14 +7,27 @@
 }
 
 .sidebar {
-	position: relative;
+	position: fixed;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	width: 160px;
+	transform: translateX(110%);
+	z-index: 150;
 	background: var(--s1);
 	border-left: 1px solid var(--border);
 	display: flex;
 	flex-direction: column;
 	padding: 1rem 0.6rem;
 	overflow: hidden;
-	transition: width 0.18s ease;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+	transition: transform 0.22s ease;
+}
+
+.header-actions {
+	display: flex;
+	gap: 0.45rem;
+	align-items: center;
 }
 
 .sidebar-brand {
@@ -239,7 +252,6 @@
 .tab:hover:not(.active) {
 	color: var(--primary-text-color);
 }
-
 
 .btn {
 	display: inline-flex;
@@ -632,18 +644,6 @@
 }
 .category-row:nth-child(n + 4) {
 	animation-delay: 0.12s;
-}
-
-.sidebar {
-	position: fixed;
-	right: 0;
-	top: 0;
-	bottom: 0;
-	width: 160px;
-	transform: translateX(110%);
-	z-index: 150;
-	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
-	transition: transform 0.22s ease;
 }
 
 .sidebar.visible {

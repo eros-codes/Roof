@@ -48,7 +48,7 @@ function attachSidebarBehavior() {
 		if (!sidebar.classList.contains('visible')) sidebar.classList.add('hidden');
 	}
 	if (sidebarToggle) {
-		const mq = window.matchMedia('(max-width:720px)');
+		const mq = window.matchMedia('(max-width:767px)');
 		const updateToggle = () => {
 			const mobile = mq.matches;
 			sidebarToggle.hidden = !mobile;
@@ -66,7 +66,7 @@ function attachSidebarBehavior() {
 	document.querySelectorAll('.nav-item[data-nav]').forEach((btn) => {
 		btn.addEventListener('click', () => {
 			navigate(btn.dataset.nav);
-			if (window.matchMedia('(max-width:720px)').matches && sidebar) {
+			if (window.matchMedia('(max-width:767px)').matches && sidebar) {
 				sidebar.classList.remove('visible'); sidebar.classList.add('hidden'); document.getElementById('sidebar-toggle')?.setAttribute('aria-expanded', 'false');
 			}
 		});

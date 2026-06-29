@@ -133,7 +133,6 @@
 	--header-color: #262e36;
 	--header-options: #faf7fa;
 	--header-options-hover: #6c6d74;
-	--nav-category: #262e36;
 	--nav-category-hover: #090f15;
 
 	--card-color: #d3d1ce;
@@ -198,6 +197,8 @@
 	--yellow-bg: rgba(234, 179, 8, 0.1);
 
 	--shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+	--mountain: #e2e5f4;
+	--midnight: #e2e5f4;
 }
 
 *::before,
